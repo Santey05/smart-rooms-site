@@ -48,9 +48,13 @@ export default function HomePage() {
   return (
     <main>
       {/* Hero */}
-      <section className="relative isolate flex min-h-[46rem] flex-col justify-end overflow-hidden bg-ink text-white">
-        <HeroArt />
-        <div className="absolute inset-0 -z-0 bg-gradient-to-b from-ink/50 via-transparent to-ink/30" />
+      <section className="relative z-10 flex min-h-[46rem] flex-col justify-end bg-ink text-white">
+        {/* overflow-hidden только у слоя с иллюстрацией: панели формы поиска
+            раскрываются вниз и должны выходить за нижний край hero */}
+        <div className="absolute inset-0 overflow-hidden">
+          <HeroArt />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink/30" />
+        </div>
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-1 items-center px-4 pb-8 pt-32">
           <LogoSign className="mr-10 hidden shrink-0 -rotate-2 lg:block" />
