@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { BnovoBookingModule } from "@/components/bnovo-booking-module";
 
 export const metadata: Metadata = {
-  title: "Бронирование — Смарт румс",
+  title: "Бронирование",
   description: "Выберите номер и даты — бронирование и оплата онлайн.",
   robots: { index: false, follow: false },
 };

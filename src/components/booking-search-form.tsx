@@ -181,7 +181,7 @@ export function BookingSearchForm() {
         {guestsOpen && (
           <div
             id={`${formId}-guests`}
-            className="absolute left-0 top-full z-30 mt-3 grid w-72 max-w-[calc(100vw-2rem)] gap-4 rounded-2xl border bg-white p-4 shadow-xl"
+            className="absolute bottom-full left-0 z-30 mb-3 grid w-72 max-w-[calc(100vw-2rem)] gap-4 rounded-2xl border bg-white p-4 shadow-xl"
           >
             <Stepper label="Взрослые" value={adults} min={1} max={10} onChange={setAdults} />
             <Stepper label="Дети" value={children} min={0} max={10} onChange={setChildren} />
