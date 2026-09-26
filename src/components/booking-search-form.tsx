@@ -2,7 +2,7 @@
 
 import { CalendarDays, ChevronDown, Minus, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +95,62 @@ function Stepper({
 const fieldInputClass =
   "h-auto border-0 bg-transparent p-0 text-base font-semibold shadow-none focus-visible:ring-0 md:text-base";
 
+/**
+ * Поле даты: кликабельно целиком (открывает системный календарь, а не только
+ * иконка), подсвечивается при наведении/фокусе и имеет шеврон как у выпадающего
+ * списка — чтобы было понятно, что здесь можно нажать.
+ */
+function DateField({
+  id,
+  label,
+  value,
+  min,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  min: string;
+  onChange: (value: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function openPicker() {
+    try {
+      inputRef.current?.showPicker();
+    } catch {
+      // showPicker недоступен или уже открыт — остаётся штатное поведение input
+    }
+  }
+
+  return (
+    <div className="lg:border-r lg:pr-3">
+      <div
+        onClick={openPicker}
+        className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-1 transition-colors hover:bg-ink/5 focus-within:bg-ink/5 focus-within:ring-2 focus-within:ring-ring/60"
+      >
+        <CalendarDays className="size-5 shrink-0 text-ink/70" aria-hidden />
+        <div className="grid min-w-0 flex-1">
+          <Label htmlFor={id} className="cursor-pointer text-xs font-normal text-ink/60">
+            {label}
+          </Label>
+          <Input
+            ref={inputRef}
+            id={id}
+            type="date"
+            required
+            value={value}
+            min={min}
+            onChange={(e) => onChange(e.target.value)}
+            className={`${fieldInputClass} cursor-pointer [&::-webkit-calendar-picker-indicator]:hidden`}
+          />
+        </div>
+        <ChevronDown className="size-4 shrink-0 text-ink/70" aria-hidden />
+      </div>
+    </div>
+  );
+}
+
 export function BookingSearchForm() {
   const router = useRouter();
   const formId = useId();
@@ -123,49 +179,29 @@ export function BookingSearchForm() {
       onSubmit={handleSubmit}
       className="grid gap-2 rounded-3xl bg-white p-3 text-ink shadow-2xl sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.2fr_auto] lg:items-center lg:rounded-full lg:p-3 lg:pl-6"
     >
-      <div className="flex items-center gap-3 px-3 py-1 lg:border-r lg:pr-6">
-        <CalendarDays className="size-5 shrink-0 text-ink/70" aria-hidden />
-        <div className="grid min-w-0 flex-1">
-          <Label htmlFor={`${formId}-checkin`} className="text-xs font-normal text-ink/60">
-            Заезд
-          </Label>
-          <Input
-            id={`${formId}-checkin`}
-            type="date"
-            required
-            value={checkIn}
-            min={new Date().toISOString().slice(0, 10)}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className={fieldInputClass}
-          />
-        </div>
-      </div>
+      <DateField
+        id={`${formId}-checkin`}
+        label="Заезд"
+        value={checkIn}
+        min={new Date().toISOString().slice(0, 10)}
+        onChange={setCheckIn}
+      />
 
-      <div className="flex items-center gap-3 px-3 py-1 lg:border-r lg:pr-6">
-        <CalendarDays className="size-5 shrink-0 text-ink/70" aria-hidden />
-        <div className="grid min-w-0 flex-1">
-          <Label htmlFor={`${formId}-checkout`} className="text-xs font-normal text-ink/60">
-            Выезд
-          </Label>
-          <Input
-            id={`${formId}-checkout`}
-            type="date"
-            required
-            value={checkOut}
-            min={checkIn}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className={fieldInputClass}
-          />
-        </div>
-      </div>
+      <DateField
+        id={`${formId}-checkout`}
+        label="Выезд"
+        value={checkOut}
+        min={checkIn}
+        onChange={setCheckOut}
+      />
 
-      <div className="relative px-3 py-1 sm:col-span-2 lg:col-span-1">
+      <div className="relative sm:col-span-2 lg:col-span-1">
         <button
           type="button"
           aria-expanded={guestsOpen}
           aria-controls={`${formId}-guests`}
           onClick={() => setGuestsOpen((open) => !open)}
-          className="flex w-full items-center gap-3 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-1 text-left outline-none transition-colors hover:bg-ink/5 focus-visible:ring-2 focus-visible:ring-ring/60"
         >
           <User className="size-5 shrink-0 text-ink/70" aria-hidden />
           <span className="grid flex-1">
