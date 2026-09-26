@@ -43,6 +43,20 @@ export function DateRangeCalendar({
       startMonth={today}
       disabled={{ before: today }}
       selected={range}
+      // Жёлтые состояния задаём сами (а не через range_* библиотеки): пока выбран
+      // только заезд, библиотека не помечает день как начало диапазона.
+      // Подложка-«капсула» появляется, только когда выбран и выезд.
+      modifiers={{
+        stayStart: range?.from ?? false,
+        stayEnd: range?.to ?? false,
+        stayMiddle:
+          range?.from && range.to ? { after: range.from, before: range.to } : false,
+      }}
+      modifiersClassNames={{
+        stayStart: cn(dayCap, range?.to && "rounded-l-full bg-sun/30"),
+        stayEnd: cn(dayCap, "rounded-r-full bg-sun/30"),
+        stayMiddle: "bg-sun/30",
+      }}
       // Управляем выбором сами: игнорируем диапазон, который считает библиотека,
       // и берём только дату клика (второй аргумент).
       onSelect={(_next, triggerDate) => handleDayClick(triggerDate)}
@@ -60,10 +74,9 @@ export function DateRangeCalendar({
         day: "p-0 text-center",
         day_button:
           "size-10 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-ring/60",
-        today: "[&>button]:ring-1 [&>button]:ring-ink/30",
-        range_start: cn(rangeCap, "rounded-l-full"),
-        range_end: cn(rangeCap, "rounded-r-full"),
-        range_middle: "bg-sun/30",
+        // Кольцо «сегодня» только у невыбранного дня: выбранный день — просто жёлтый.
+        today:
+          "[&:not([aria-selected=true])>button]:ring-1 [&:not([aria-selected=true])>button]:ring-ink/30",
         // Дни соседних месяцев не показываем, вместе с подложкой диапазона.
         outside: "invisible",
         hidden: "invisible",
@@ -85,5 +98,5 @@ export function DateRangeCalendar({
 const navButton =
   "flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors hover:bg-ink/5 focus-visible:ring-2 focus-visible:ring-ring/60 outline-none disabled:cursor-not-allowed disabled:opacity-30";
 
-// Крайние дни диапазона: жёлтый кружок + подложка диапазона.
-const rangeCap = "bg-sun/30 [&>button]:bg-sun [&>button]:font-bold";
+// Заезд/выезд: жёлтый кружок.
+const dayCap = "[&>button]:bg-sun [&>button]:font-bold";
