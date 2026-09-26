@@ -172,7 +172,7 @@ export function BookingSearchForm() {
     from: addDays(startOfToday(), 1),
     to: addDays(startOfToday(), 2),
   }));
-  const [adults, setAdults] = useState(2);
+  const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [open, setOpen] = useState<OpenPanel>(null);
 
