@@ -74,9 +74,6 @@ export function DateRangeCalendar({
         day: "p-0 text-center",
         day_button:
           "size-10 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-ring/60",
-        // Кольцо «сегодня» только у невыбранного дня: выбранный день — просто жёлтый.
-        today:
-          "[&:not([aria-selected=true])>button]:ring-1 [&:not([aria-selected=true])>button]:ring-ink/30",
         // Дни соседних месяцев не показываем, вместе с подложкой диапазона.
         outside: "invisible",
         hidden: "invisible",
