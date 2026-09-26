@@ -95,5 +95,7 @@ export function DateRangeCalendar({
 const navButton =
   "flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors hover:bg-ink/5 focus-visible:ring-2 focus-visible:ring-ring/60 outline-none disabled:cursor-not-allowed disabled:opacity-30";
 
-// Заезд/выезд: жёлтый кружок.
-const dayCap = "[&>button]:bg-sun [&>button]:font-bold";
+// Заезд/выезд: жёлтый кружок. hover: нужен, чтобы серая подсветка наведения
+// (hover:bg-ink/10 у day_button) не перебивала жёлтый сразу после клика.
+const dayCap =
+  "[&>button]:bg-sun [&>button]:hover:bg-sun [&>button]:font-bold";
