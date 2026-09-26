@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BookingSearchForm } from "@/components/booking-search-form";
+import { ContactList } from "@/components/contact-list";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -52,13 +53,12 @@ export default function HomePage() {
         <div className="aspect-video rounded-lg bg-muted" aria-hidden />
       </section>
 
-      {/* Контакты — заглушка, наполняется на этапе 5 (CLAUDE.md) */}
-      <section id="contacts" className="flex flex-col gap-2 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight">Контакты</h2>
-        <p className="text-muted-foreground">
-          Адрес, телефон и как добраться — здесь появятся после наполнения
-          контента.
-        </p>
+      {/* Контакты — данные из src/content/site.ts */}
+      <section id="contacts" className="mx-auto flex w-full max-w-xl flex-col gap-4">
+        <h2 className="text-center text-2xl font-semibold tracking-tight">
+          Контакты
+        </h2>
+        <ContactList />
       </section>
     </main>
   );
