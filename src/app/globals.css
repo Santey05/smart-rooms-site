@@ -2,49 +2,37 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Дизайн-токены сайта (референс: «петербургский вечер» — тёмные чернильные
+ * блоки, кремовый фон, тёплый жёлтый акцент). Тёмная тема не используется:
+ * тёмные секции делаются классами bg-ink / text-cream, а не .dark.
+ */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+  --background: oklch(0.965 0.012 90); /* кремовый */
+  --foreground: oklch(0.21 0.04 265); /* чернильно-синий */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.21 0.04 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.21 0.04 265);
+  --primary: oklch(0.88 0.16 95); /* тёплый жёлтый */
+  --primary-foreground: oklch(0.21 0.04 265);
+  --secondary: oklch(0.93 0.015 90);
+  --secondary-foreground: oklch(0.21 0.04 265);
+  --muted: oklch(0.93 0.015 90);
+  --muted-foreground: oklch(0.46 0.03 265);
+  --accent: oklch(0.93 0.015 90);
+  --accent-foreground: oklch(0.21 0.04 265);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-}
+  --border: oklch(0.89 0.012 90);
+  --input: oklch(0.89 0.012 90);
+  --ring: oklch(0.7 0.13 95);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ink: oklch(0.21 0.04 265);
+  --ink-soft: oklch(0.27 0.045 265);
+  --cream: oklch(0.965 0.012 90);
+  --sun: oklch(0.88 0.16 95);
 }
 
 @theme inline {
@@ -73,9 +61,15 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-cream: var(--cream);
+  --color-sun: var(--sun);
+
   --font-sans:
-    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif;
+    var(--font-manrope), system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-hand: var(--font-caveat), "Segoe Script", cursive;
 }
 
 @layer base {

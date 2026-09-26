@@ -14,6 +14,8 @@ export interface HotelInfo {
   name: string;
   /** Полный почтовый адрес */
   address: string | null;
+  /** Как добраться от метро, например "Метро — 2 минуты пешком" */
+  metroNote: string | null;
   /** Телефон в международном формате, например "+7 900 000-00-00" */
   phone: string | null;
   email: string | null;
@@ -26,8 +28,9 @@ export interface HotelInfo {
 }
 
 export const hotel: HotelInfo = {
-  name: "Смарт румс",
-  address: null,
+  name: "Смарт Румс",
+  address: "Санкт-Петербург, ул. Марата, 30",
+  metroNote: "Метро — 2 минуты пешком",
   phone: null,
   email: null,
   receptionHours: null,
