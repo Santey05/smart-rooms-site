@@ -21,6 +21,10 @@ export default function RulesPage() {
           <dt className="text-muted-foreground">Выезд</dt>
           <dd>{hotel.checkOutTime ?? UNKNOWN_LABEL}</dd>
         </div>
+        <div className="grid gap-1 sm:grid-cols-[12rem_1fr]">
+          <dt className="text-muted-foreground">Заселение</dt>
+          <dd>{hotel.checkInMethod ?? UNKNOWN_LABEL}</dd>
+        </div>
       </dl>
 
       {stayRules.length > 0 ? (

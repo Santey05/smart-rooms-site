@@ -25,8 +25,12 @@ export interface HotelInfo {
   /** Ссылка на WhatsApp/Telegram, например "https://wa.me/79000000000" */
   messengerHref: string | null;
   email: string | null;
-  /** Часы работы ресепшена, например "круглосуточно" */
-  receptionHours: string | null;
+  /**
+   * Как происходит заселение. Ресепшена и постоянного персонала на месте
+   * нет — заселение удалённое/самостоятельное, код от номера присылают
+   * перед заездом.
+   */
+  checkInMethod: string | null;
   /** Время заезда, например "14:00" */
   checkInTime: string | null;
   /** Время выезда, например "12:00" */
@@ -42,7 +46,7 @@ export const hotel: HotelInfo = {
   phone: "+7 995 593-21-96",
   messengerHref: null,
   email: "itt.ppr@mail.ru",
-  receptionHours: null,
+  checkInMethod: "Без ресепшена — заселение самостоятельное, код от номера пришлём перед заездом",
   checkInTime: null,
   checkOutTime: null,
 };

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Контакты",
-  description: "Адрес, телефон и часы работы ресепшена мини-отеля «Смарт румс».",
+  description: "Адрес, телефон и как заселиться в мини-отель «Смарт румс».",
 };
 
 export default function ContactsPage() {

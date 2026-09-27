@@ -34,7 +34,7 @@ export function ContactList() {
           unknown
         )}
       </Row>
-      <Row label="Ресепшен">{hotel.receptionHours ?? unknown}</Row>
+      <Row label="Заселение">{hotel.checkInMethod ?? unknown}</Row>
     </dl>
   );
 }
