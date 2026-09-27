@@ -8,7 +8,7 @@ import type { DateRange } from "react-day-picker";
 
 import { DateRangeCalendar } from "@/components/date-range-calendar";
 import { Button } from "@/components/ui/button";
-import { hotel, UNKNOWN_LABEL } from "@/content/site";
+import { hotel } from "@/content/site";
 import { buildBookingHref } from "@/lib/booking";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +23,9 @@ import { cn } from "@/lib/utils";
  * раздела 6.5 спецификации сюда сознательно не перенесена — сайт не хранит
  * данные о номерах, показывать её не из чего (раздел 5.3 CLAUDE.md); в
  * самой спецификации эта цифра тоже отмечена как неподтверждённая заглушка
- * (раздел 9). Время заезда/выезда — факт из src/content/site.ts, а не
- * расчёт сайта.
+ * (раздел 9). Блок «время заезда/выезда» из раздела 6.5 тоже не перенесён:
+ * в самом модуле Bnovo такого блока нет, и site.ts эти часы дублировать не
+ * должен — источник правды для гостя один, модуль на /booking.
  *
  * Даты хранятся как локальные Date (не строки YYYY-MM-DD через UTC), чтобы
  * день не сдвигался для гостей в других часовых поясах.
@@ -274,22 +275,6 @@ export function BookingSearchForm() {
           controls={datesPanelId}
           onClick={() => toggle("dates")}
         />
-      </div>
-
-      {/* Заезд/выезд — факт из src/content/site.ts, не расчёт сайта. */}
-      <div className="grid grid-cols-2 divide-x divide-divider rounded-xl bg-field-bg">
-        <div className="px-5 py-4">
-          <p className="text-sm text-granite">Заезд</p>
-          <p className="mt-0.5 text-[15px] text-white">
-            {hotel.checkInTime ? `после ${hotel.checkInTime}` : UNKNOWN_LABEL}
-          </p>
-        </div>
-        <div className="px-5 py-4">
-          <p className="text-sm text-granite">Выезд</p>
-          <p className="mt-0.5 text-[15px] text-white">
-            {hotel.checkOutTime ? `до ${hotel.checkOutTime}` : UNKNOWN_LABEL}
-          </p>
-        </div>
       </div>
 
       <div className="relative">
