@@ -42,9 +42,10 @@ export function DateRangeCalendar({
       startMonth={today}
       disabled={{ before: today }}
       selected={range}
-      // Тёплое состояние — только цвет цифры, без кружка и подложки (пока
-      // выбран только заезд, библиотека не помечает день как начало
-      // диапазона, поэтому считаем сами).
+      // Заезд/выезд — цифра тёплого цвета и тонкое кольцо-обводка; дни между
+      // ними — только цвет цифры, без кольца и подложки (пока выбран только
+      // заезд, библиотека не помечает день как начало диапазона, поэтому
+      // считаем сами).
       modifiers={{
         stayStart: range?.from ?? false,
         stayEnd: range?.to ?? false,
@@ -52,8 +53,8 @@ export function DateRangeCalendar({
           range?.from && range.to ? { after: range.from, before: range.to } : false,
       }}
       modifiersClassNames={{
-        stayStart: dayWarm,
-        stayEnd: dayWarm,
+        stayStart: dayEdge,
+        stayEnd: dayEdge,
         stayMiddle: dayWarm,
       }}
       // Управляем выбором сами: игнорируем диапазон, который считает библиотека,
@@ -94,5 +95,9 @@ export function DateRangeCalendar({
 const navButton =
   "flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 outline-none disabled:cursor-not-allowed disabled:opacity-30";
 
-// Заезд, выезд и дни между ними — только цвет цифры, без кружка и подложки.
+// Дни между заездом и выездом — только цвет цифры, без кольца и подложки.
 const dayWarm = "[&>button]:text-lantern [&>button]:font-bold";
+
+// Заезд и выезд — тот же тёплый цвет цифры плюс тонкое кольцо-обводка
+// (не заливка — заливку кружка убрали по просьбе, см. коммит выше).
+const dayEdge = `${dayWarm} [&>button]:ring-1 [&>button]:ring-inset [&>button]:ring-lantern`;
