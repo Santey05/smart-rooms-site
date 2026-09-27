@@ -15,7 +15,7 @@ export default function ContactsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Контакты</h1>
       <ContactList />
       <div>
-        <Button asChild size="lg">
+        <Button asChild variant="dark" size="lg" className="rounded-[10px]">
           <Link href="/booking">Смотреть номера и цены</Link>
         </Button>
       </div>

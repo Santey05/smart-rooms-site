@@ -1,116 +1,131 @@
 /**
- * Векторные иллюстрации в стиле референса: вечерний Петербург.
- * Это временная замена фотографиям (см. CLAUDE.md, раздел 7): когда появятся
- * реальные фото с проверенными правами, компоненты заменяются на next/image.
+ * Векторная иллюстрация «синего часа» на улице Марата — временная замена
+ * фотографии (раздел 3 спецификации, CLAUDE.md раздел 7): холодное небо и
+ * фасады, тёплый акцент только в окнах и фонаре. Когда появится реальная
+ * съёмка района, компонент заменяется на next/image.
  */
-
-/** Закатное небо + силуэт Исаакиевского собора, набережная и вода. */
 export function HeroArt() {
   return (
     <svg
-      viewBox="0 0 1440 760"
+      viewBox="0 0 1440 900"
       preserveAspectRatio="xMidYMax slice"
       aria-hidden
       className="absolute inset-0 h-full w-full"
     >
       <defs>
-        <linearGradient id="hero-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#141a3a" />
-          <stop offset="0.45" stopColor="#4a3f78" />
-          <stop offset="0.72" stopColor="#c8637a" />
-          <stop offset="0.9" stopColor="#f0a566" />
-          <stop offset="1" stopColor="#f6c27a" />
+        <linearGradient id="street-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0e1620" />
+          <stop offset="0.55" stopColor="#25333f" />
+          <stop offset="1" stopColor="#3c4d5a" />
         </linearGradient>
-        <radialGradient id="hero-glow" cx="0.62" cy="0.7" r="0.5">
-          <stop offset="0" stopColor="#ffd28a" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#ffd28a" stopOpacity="0" />
+        <linearGradient id="street-road" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#232f38" />
+          <stop offset="1" stopColor="#0f161c" />
+        </linearGradient>
+        <radialGradient id="street-glow" cx="0.7" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#e9a55b" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#e9a55b" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="hero-dome" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffe08a" />
-          <stop offset="1" stopColor="#c48a2c" />
-        </linearGradient>
-        <linearGradient id="hero-water" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#7a5f8a" />
-          <stop offset="1" stopColor="#1a1f3d" />
-        </linearGradient>
-        <radialGradient id="hero-lamp" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#ffe6a0" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#ffe6a0" stopOpacity="0" />
+        <radialGradient id="lamp-glow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#f3c088" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#f3c088" stopOpacity="0" />
         </radialGradient>
+        <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#a9b6c1" stopOpacity="0" />
+          <stop offset="1" stopColor="#a9b6c1" stopOpacity="0.16" />
+        </linearGradient>
       </defs>
 
-      <rect width="1440" height="760" fill="url(#hero-sky)" />
-      <rect width="1440" height="760" fill="url(#hero-glow)" />
+      <rect width="1440" height="900" fill="url(#street-sky)" />
+      <rect width="1440" height="900" fill="url(#street-glow)" />
 
-      {/* облака */}
-      <g fill="#ffffff" opacity="0.12">
-        <ellipse cx="250" cy="200" rx="260" ry="26" />
-        <ellipse cx="620" cy="140" rx="200" ry="20" />
-        <ellipse cx="1120" cy="230" rx="280" ry="24" />
+      {/* туман над крышами */}
+      <g fill="#c7d2da" opacity="0.1">
+        <ellipse cx="300" cy="260" rx="320" ry="30" />
+        <ellipse cx="900" cy="200" rx="260" ry="24" />
       </g>
 
-      {/* дальний ряд зданий */}
-      <path
-        d="M0 560 V520 H60 V500 H130 V530 H210 V505 H300 V540 H380 V515 H460 V545 H560 V520 H660 V560 Z M900 560 V525 H980 V500 H1060 V535 H1150 V510 H1240 V540 H1330 V515 H1440 V560 Z"
-        fill="#3a3560"
-        opacity="0.85"
-      />
-
-      {/* Исаакиевский собор */}
-      <g fill="#2a2748">
-        {/* колоннада и основание */}
-        <rect x="770" y="470" width="330" height="90" />
-        <path d="M770 470 L935 430 L1100 470 Z" />
-        {/* барабан */}
-        <rect x="880" y="360" width="110" height="80" />
-        {/* колонны барабана */}
-        <g fill="#3a3560">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <rect key={i} x={888 + i * 13} y="366" width="6" height="70" />
-          ))}
-        </g>
-        {/* угловые купола */}
-        <rect x="790" y="420" width="46" height="50" />
-        <rect x="1034" y="420" width="46" height="50" />
+      {/* доходные дома — фасады вдоль улицы */}
+      <g fill="#1a232b">
+        <rect x="-20" y="300" width="420" height="380" />
+        <rect x="380" y="240" width="360" height="440" />
+        <rect x="720" y="280" width="330" height="400" />
+        <rect x="1030" y="230" width="430" height="450" />
       </g>
-      <path d="M880 360 Q935 250 990 360 Z" fill="url(#hero-dome)" />
-      <rect x="931" y="262" width="8" height="26" fill="#c48a2c" />
-      <path d="M921 262 h28 l-14 -22 z" fill="#ffe08a" />
-      <path d="M790 420 Q813 385 836 420 Z" fill="url(#hero-dome)" />
-      <path d="M1034 420 Q1057 385 1080 420 Z" fill="url(#hero-dome)" />
+      {/* карнизы */}
+      <g fill="#141c23">
+        <rect x="-20" y="290" width="420" height="14" />
+        <rect x="380" y="230" width="360" height="14" />
+        <rect x="720" y="270" width="330" height="14" />
+        <rect x="1030" y="220" width="430" height="14" />
+      </g>
 
-      {/* набережная */}
-      <rect x="0" y="560" width="1440" height="22" fill="#221f3d" />
-      <g fill="#221f3d">
-        {Array.from({ length: 48 }).map((_, i) => (
-          <rect key={i} x={i * 30 + 6} y="540" width="4" height="22" />
+      {/* окна — тёмные, редкие тёплые (не больше 2–3 акцентов) */}
+      <g>
+        {Array.from({ length: 8 }).map((_, row) =>
+          Array.from({ length: 6 }).map((_, col) => {
+            const x = 20 + col * 62;
+            const y = 340 + row * 42;
+            return <rect key={`a-${row}-${col}`} x={x} y={y} width="26" height="30" fill="#0c1216" />;
+          }),
+        )}
+        {Array.from({ length: 9 }).map((_, row) =>
+          Array.from({ length: 5 }).map((_, col) => {
+            const x = 410 + col * 62;
+            const y = 280 + row * 42;
+            return <rect key={`b-${row}-${col}`} x={x} y={y} width="26" height="30" fill="#0c1216" />;
+          }),
+        )}
+        {Array.from({ length: 8 }).map((_, row) =>
+          Array.from({ length: 5 }).map((_, col) => {
+            const x = 750 + col * 60;
+            const y = 320 + row * 42;
+            return <rect key={`c-${row}-${col}`} x={x} y={y} width="26" height="30" fill="#0c1216" />;
+          }),
+        )}
+        {Array.from({ length: 9 }).map((_, row) =>
+          Array.from({ length: 6 }).map((_, col) => {
+            const x = 1060 + col * 62;
+            const y = 270 + row * 42;
+            return <rect key={`d-${row}-${col}`} x={x} y={y} width="26" height="30" fill="#0c1216" />;
+          }),
+        )}
+
+        {/* тёплые окна — единственный акцент помимо фонаря */}
+        <rect x="1184" y="396" width="26" height="30" fill="#f3c088" opacity="0.9" />
+        <rect x="1246" y="438" width="26" height="30" fill="#f3c088" opacity="0.75" />
+      </g>
+
+      {/* улица */}
+      <rect x="0" y="680" width="1440" height="220" fill="url(#street-road)" />
+      <g fill="#141c23" opacity="0.6">
+        {Array.from({ length: 46 }).map((_, i) => (
+          <rect key={i} x={i * 32} y="686" width="3" height="200" transform={`skewX(-6)`} />
         ))}
-        <rect x="0" y="538" width="1440" height="4" />
+      </g>
+      {/* мокрые блики */}
+      <g stroke="#f3c088" strokeWidth="3" opacity="0.3" strokeLinecap="round">
+        <line x1="1120" y1="760" x2="1120" y2="860" />
+        <line x1="1160" y1="770" x2="1160" y2="850" />
+        <line x1="1080" y1="775" x2="1080" y2="845" />
       </g>
 
-      {/* вода с бликами */}
-      <rect x="0" y="582" width="1440" height="178" fill="url(#hero-water)" />
-      <g stroke="#ffd28a" strokeWidth="2" opacity="0.35" strokeLinecap="round">
-        <line x1="880" y1="605" x2="990" y2="605" />
-        <line x1="900" y1="625" x2="980" y2="625" />
-        <line x1="915" y1="646" x2="965" y2="646" />
-        <line x1="600" y1="612" x2="700" y2="612" />
-        <line x1="1180" y1="618" x2="1290" y2="618" />
+      {/* фонарь — главный тёплый объект, справа над карточкой бронирования */}
+      <circle cx="1150" cy="430" r="180" fill="url(#lamp-glow)" />
+      <g fill="#0c1216">
+        <rect x="1144" y="470" width="10" height="420" />
+        <rect x="1128" y="456" width="42" height="16" rx="3" />
+        <path d="M1120 456 L1149 398 L1178 456 Z" />
       </g>
+      <rect x="1136" y="406" width="26" height="42" fill="#f3c088" />
+      <circle cx="1149" cy="427" r="38" fill="url(#lamp-glow)" opacity="0.85" />
 
-      {/* фонарь справа */}
-      <circle cx="1360" cy="150" r="120" fill="url(#hero-lamp)" />
-      <g fill="#14172e">
-        <rect x="1354" y="180" width="12" height="380" />
-        <rect x="1342" y="170" width="36" height="14" rx="3" />
-        <path d="M1336 170 L1360 130 L1384 170 Z" />
-        <rect x="1346" y="140" width="28" height="30" fill="#ffe6a0" />
-      </g>
+      <rect width="1440" height="900" fill="url(#mist)" />
     </svg>
   );
 }
 
-/** Градиентная «открытка» вместо фото для полароидов. */
+/** Градиентная «открытка» вместо фото — временная замена (см. HeroArt). */
 export function PhotoPlaceholder({
   variant,
   className,
@@ -120,8 +135,8 @@ export function PhotoPlaceholder({
 }) {
   const stops =
     variant === "metro"
-      ? ["#2a2f5c", "#8a5a86", "#f0a566"]
-      : ["#3b4f8a", "#b4688a", "#f6c27a"];
+      ? ["#1d2a35", "#3c4d5a", "#e9a55b"]
+      : ["#1a232b", "#25333f", "#a9b6c1"];
   const id = `ph-${variant}`;
   return (
     <svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid slice" aria-hidden className={className}>
@@ -134,21 +149,18 @@ export function PhotoPlaceholder({
       </defs>
       <rect width="300" height="200" fill={`url(#${id})`} />
       {variant === "metro" ? (
-        <g fill="#1a1d3a">
+        <g fill="#0c1216">
           <rect x="20" y="70" width="70" height="130" />
           <rect x="95" y="50" width="60" height="150" />
           <rect x="160" y="80" width="50" height="120" />
           <rect x="215" y="60" width="70" height="140" />
-          <circle cx="235" cy="40" r="16" fill="#e5433a" />
-          <text x="235" y="46" textAnchor="middle" fontSize="18" fontWeight="800" fill="#fff">
-            M
-          </text>
+          <rect x="225" y="90" width="18" height="22" fill="#e9a55b" opacity="0.85" />
         </g>
       ) : (
-        <g fill="#1a1d3a">
-          <rect x="0" y="120" width="300" height="80" fill="#3a3a68" />
+        <g fill="#0c1216">
+          <rect x="0" y="120" width="300" height="80" fill="#1d2a35" />
           <rect x="30" y="70" width="240" height="50" />
-          <path d="M120 70 Q150 20 180 70 Z" fill="#e8b85a" />
+          <rect x="60" y="90" width="16" height="20" fill="#e9a55b" opacity="0.85" />
           <rect x="0" y="118" width="300" height="6" />
         </g>
       )}

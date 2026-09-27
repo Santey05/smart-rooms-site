@@ -14,10 +14,16 @@ export interface HotelInfo {
   name: string;
   /** Полный почтовый адрес */
   address: string | null;
-  /** Как добраться от метро, например "Метро — 2 минуты пешком" */
-  metroNote: string | null;
+  /** Год постройки дома, если известен (источник — 2ГИС) */
+  builtYear: number | null;
+  /** Ближайшая станция метро */
+  metroStation: string | null;
+  /** Время пешком до метро в минутах (источник — spbmap.ru) */
+  metroMinutes: number | null;
   /** Телефон в международном формате, например "+7 900 000-00-00" */
   phone: string | null;
+  /** Ссылка на WhatsApp/Telegram, например "https://wa.me/79000000000" */
+  messengerHref: string | null;
   email: string | null;
   /** Часы работы ресепшена, например "круглосуточно" */
   receptionHours: string | null;
@@ -28,10 +34,13 @@ export interface HotelInfo {
 }
 
 export const hotel: HotelInfo = {
-  name: "Смарт Румс",
+  name: "Смарт румс",
   address: "Санкт-Петербург, ул. Марата, 30",
-  metroNote: "Метро — 2 минуты пешком",
+  builtYear: 1860,
+  metroStation: "Владимирская",
+  metroMinutes: 5,
   phone: null,
+  messengerHref: null,
   email: null,
   receptionHours: null,
   checkInTime: null,

@@ -1,7 +1,8 @@
-/** Пункты основной навигации — общие для SiteHeader и hero-карточки на главной. */
+/** Пункты основной навигации (раздел 6.1 спецификации) — общие для
+ * SiteHeader и навигации внутри hero-карточки на главной. */
 export const NAV_LINKS = [
-  { href: "/#about", label: "О нас" },
   { href: "/#rooms", label: "Номера" },
-  { href: "/#location", label: "Расположение" },
+  { href: "/#location", label: "Петербург рядом" },
+  { href: "/#about", label: "Об отеле" },
   { href: "/contacts", label: "Контакты" },
 ] as const;

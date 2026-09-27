@@ -7,9 +7,10 @@ import { ru } from "react-day-picker/locale";
 import { cn } from "@/lib/utils";
 
 /**
- * Календарь выбора заезда/выезда в стиле сайта (тот же вид, что у панели
- * гостей). Ничего не проверяет, кроме «нельзя выбрать прошедшую дату» —
- * доступность дат проверяет модуль Bnovo (CLAUDE.md 4.1).
+ * Календарь выбора заезда/выезда в «стеклянном стиле» карточки бронирования
+ * (раздел 6.5 спецификации). Ничего не проверяет, кроме «нельзя выбрать
+ * прошедшую дату» и «выезд не раньше заезда + 1 день» — доступность дат
+ * проверяет модуль Bnovo (CLAUDE.md 4.1).
  */
 export function DateRangeCalendar({
   range,
@@ -43,9 +44,10 @@ export function DateRangeCalendar({
       startMonth={today}
       disabled={{ before: today }}
       selected={range}
-      // Жёлтые состояния задаём сами (а не через range_* библиотеки): пока выбран
-      // только заезд, библиотека не помечает день как начало диапазона.
-      // Подложка-«капсула» появляется, только когда выбран и выезд.
+      // Тёплые состояния задаём сами (а не через range_* библиотеки): пока
+      // выбран только заезд, библиотека не помечает день как начало
+      // диапазона. Подложка-«капсула» появляется, только когда выбран и
+      // выезд.
       modifiers={{
         stayStart: range?.from ?? false,
         stayEnd: range?.to ?? false,
@@ -53,15 +55,15 @@ export function DateRangeCalendar({
           range?.from && range.to ? { after: range.from, before: range.to } : false,
       }}
       modifiersClassNames={{
-        stayStart: cn(dayCap, range?.to && "rounded-l-full bg-sun/30"),
-        stayEnd: cn(dayCap, "rounded-r-full bg-sun/30"),
-        stayMiddle: "bg-sun/30",
+        stayStart: cn(dayCap, range?.to && "rounded-l-full bg-lantern/25"),
+        stayEnd: cn(dayCap, "rounded-r-full bg-lantern/25"),
+        stayMiddle: "bg-lantern/15",
       }}
       // Управляем выбором сами: игнорируем диапазон, который считает библиотека,
       // и берём только дату клика (второй аргумент).
       onSelect={(_next, triggerDate) => handleDayClick(triggerDate)}
       classNames={{
-        root: "relative",
+        root: "relative text-white",
         months: "relative flex flex-col gap-6 sm:flex-row",
         month: "grid gap-3",
         month_caption: "flex h-8 items-center justify-center",
@@ -70,10 +72,10 @@ export function DateRangeCalendar({
         button_previous: navButton,
         button_next: navButton,
         month_grid: "border-collapse",
-        weekday: "size-10 text-xs font-normal text-ink/50",
+        weekday: "size-10 text-xs font-normal text-granite",
         day: "p-0 text-center",
         day_button:
-          "size-10 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-ink/10 focus-visible:ring-2 focus-visible:ring-ring/60",
+          "size-10 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50",
         // Дни соседних месяцев не показываем, вместе с подложкой диапазона.
         outside: "invisible",
         hidden: "invisible",
@@ -93,9 +95,9 @@ export function DateRangeCalendar({
 }
 
 const navButton =
-  "flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors hover:bg-ink/5 focus-visible:ring-2 focus-visible:ring-ring/60 outline-none disabled:cursor-not-allowed disabled:opacity-30";
+  "flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 outline-none disabled:cursor-not-allowed disabled:opacity-30";
 
-// Заезд/выезд: жёлтый кружок. hover: нужен, чтобы серая подсветка наведения
-// (hover:bg-ink/10 у day_button) не перебивала жёлтый сразу после клика.
+// Заезд/выезд: тёплый кружок. hover: нужен, чтобы серая подсветка наведения
+// (hover:bg-white/10 у day_button) не перебивала акцент сразу после клика.
 const dayCap =
-  "[&>button]:bg-sun [&>button]:hover:bg-sun [&>button]:font-bold";
+  "[&>button]:bg-lantern [&>button]:hover:bg-lantern [&>button]:text-text-dark [&>button]:font-bold";

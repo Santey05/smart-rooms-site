@@ -3,43 +3,53 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Дизайн-токены сайта (референс: «петербургский вечер» — тёмные чернильные
- * блоки, кремовый фон, тёплый жёлтый акцент). Тёмная тема не используется:
- * тёмные секции делаются классами bg-ink / text-cream, а не .dark.
+ * Дизайн-токены сайта — по дизайн-спецификации hero-экрана «Смарт румс»
+ * (Sep 27, 2026): петербургский синий час, гранит, туман и один тёплый
+ * акцент — свет фонаря. Тёмная тема не используется: тёмные поверхности
+ * делаются токенами --neva/--glass-*, а не через .dark.
  */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.965 0.012 90); /* кремовый */
-  --foreground: oklch(0.21 0.04 265); /* чернильно-синий */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.04 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.04 265);
-  --primary: oklch(0.88 0.16 95); /* тёплый жёлтый */
-  --primary-foreground: oklch(0.21 0.04 265);
-  --secondary: oklch(0.93 0.015 90);
-  --secondary-foreground: oklch(0.21 0.04 265);
-  --muted: oklch(0.93 0.015 90);
-  --muted-foreground: oklch(0.46 0.03 265);
-  --accent: oklch(0.93 0.015 90);
-  --accent-foreground: oklch(0.21 0.04 265);
+  --radius: 0.625rem;
+
+  --background: #eef2f5;
+  --foreground: #141b22; /* --text-dark */
+  --card: #ffffff;
+  --card-foreground: #141b22;
+  --popover: #ffffff;
+  --popover-foreground: #141b22;
+  --primary: #ffffff;
+  --primary-foreground: #141b22;
+  --secondary: #e3e9ed;
+  --secondary-foreground: #141b22;
+  --muted: #e3e9ed;
+  --muted-foreground: rgba(20, 27, 34, 0.62);
+  --accent: #e3e9ed;
+  --accent-foreground: #141b22;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.89 0.012 90);
-  --input: oklch(0.89 0.012 90);
-  --ring: oklch(0.7 0.13 95);
+  --border: #d7dfe4;
+  --input: #d7dfe4;
+  --ring: #e9a55b;
 
-  --ink: oklch(0.21 0.04 265);
-  --ink-soft: oklch(0.27 0.045 265);
-  --cream: oklch(0.965 0.012 90);
-  --sun: oklch(0.88 0.16 95);
+  /* Именованные токены палитры (см. раздел 5 спецификации) */
+  --white: #ffffff;
+  --granite: #a9b6c1; /* гранит набережных — текст на тёмном фото */
+  --text-dark: #141b22; /* чугун оград — текст на белых кнопках */
+  --lantern: #e9a55b; /* свет фонаря — единственный тёплый акцент */
+  --neva: #1d2a35; /* невская вода — основа тёмных подложек */
+  --glass-bg: rgba(29, 42, 53, 0.38);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --field-bg: rgba(16, 24, 32, 0.55);
+  --divider: rgba(255, 255, 255, 0.25);
+  --page-fog-start: #eef2f5;
+  --page-fog-end: #c5d3dd;
 }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: 2rem; /* hero-карточка, 32px */
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -61,14 +71,20 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-cream: var(--cream);
-  --color-sun: var(--sun);
+  --color-white: var(--white);
+  --color-granite: var(--granite);
+  --color-text-dark: var(--text-dark);
+  --color-lantern: var(--lantern);
+  --color-neva: var(--neva);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-field-bg: var(--field-bg);
+  --color-divider: var(--divider);
 
   --font-sans:
-    var(--font-manrope), system-ui, -apple-system, "Segoe UI", Roboto,
+    var(--font-onest), system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-accent: var(--font-cormorant), Georgia, serif;
 }
 
 @layer base {
@@ -76,6 +92,9 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* «Невский туман» — фон страницы за hero-карточкой (раздел 2). */
+    background: linear-gradient(180deg, var(--page-fog-start) 0%, var(--page-fog-end) 100%);
+    background-attachment: fixed;
   }
 }

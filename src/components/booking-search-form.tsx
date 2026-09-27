@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDays, ChevronDown, Minus, Plus, User } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import type { DateRange } from "react-day-picker";
@@ -12,14 +13,18 @@ import { buildBookingHref } from "@/lib/booking";
 import { cn } from "@/lib/utils";
 
 /**
- * Карточка бронирования на главной (тёмное стекло поверх hero).
+ * Карточка бронирования на главной — стеклянная карточка поверх hero-фото
+ * (раздел 6.5 спецификации).
  *
- * Правило CLAUDE.md 4.1: эта форма ничего не проверяет и не считает.
- * Она только собирает дату заезда, дату выезда, число взрослых и детей
- * и передаёт их на страницу /booking, где всё остальное делает модуль
- * Bnovo. Цену и время заезда/выезда карточка не рассчитывает — время
- * заезда/выезда показывает как факт из src/content/site.ts (раздел 5.3:
- * цены на сайте не показываются вовсе).
+ * Правило CLAUDE.md 4.1/5.3: эта карточка ничего не проверяет, не считает и
+ * не показывает цену — она только собирает дату заезда, дату выезда, число
+ * взрослых и детей и передаёт их на страницу /booking, где всё остальное
+ * (номера, цены, доступность) показывает модуль Bnovo. Цена «от N ₽» из
+ * раздела 6.5 спецификации сюда сознательно не перенесена — сайт не хранит
+ * данные о номерах, показывать её не из чего (раздел 5.3 CLAUDE.md); в
+ * самой спецификации эта цифра тоже отмечена как неподтверждённая заглушка
+ * (раздел 9). Время заезда/выезда — факт из src/content/site.ts, а не
+ * расчёт сайта.
  *
  * Даты хранятся как локальные Date (не строки YYYY-MM-DD через UTC), чтобы
  * день не сдвигался для гостей в других часовых поясах.
@@ -34,12 +39,25 @@ function addDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 }
 
-/** ДД.ММ.ГГГГ */
-function formatDate(date: Date | undefined): string {
-  if (!date) return "Выберите дату";
-  const dd = String(date.getDate()).padStart(2, "0");
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  return `${dd}.${mm}.${date.getFullYear()}`;
+const SHORT_MONTHS = [
+  "янв",
+  "фев",
+  "мар",
+  "апр",
+  "май",
+  "июн",
+  "июл",
+  "авг",
+  "сен",
+  "окт",
+  "ноя",
+  "дек",
+];
+
+/** «11 янв» — формат карточки (раздел 6.5 спецификации). */
+function formatDateShort(date: Date | undefined): string {
+  if (!date) return "выбрать";
+  return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
 }
 
 /** Склонение: 1 взрослый, 2 взрослых, 5 взрослых. */
@@ -57,11 +75,11 @@ function guestsLabel(adults: number, children: number): string {
   return `${a}, ${children} ${plural(children, "ребёнок", "ребёнка", "детей")}`;
 }
 
-// Панели дат/гостей — светлый попап поверх тёмной карточки, растёт влево:
-// карточка обычно прижата к правому краю hero, растущий вправо попап уехал
-// бы за экран.
+// Попап дат/гостей — тёмное стекло, тот же материал, что у самой карточки
+// (раздел 6.5). Растёт от правого края: карточка обычно прижата к правому
+// краю hero, попап, растущий вправо, уехал бы за экран.
 const panelClass =
-  "absolute right-0 top-full z-30 mt-3 max-w-[calc(100vw-2rem)] rounded-2xl border bg-white p-4 text-ink shadow-xl";
+  "absolute right-0 top-full z-30 mt-3 max-w-[calc(100vw-2rem)] rounded-2xl border border-glass-border bg-neva/90 p-4 text-white shadow-2xl backdrop-blur-xl";
 
 function useIsWide(): boolean {
   return useSyncExternalStore(
@@ -96,7 +114,7 @@ function Stepper({
           type="button"
           variant="outline"
           size="icon"
-          className="size-8 rounded-full"
+          className="size-8 rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
           aria-label={`Уменьшить: ${label}`}
           disabled={value <= min}
           onClick={() => onChange(value - 1)}
@@ -110,7 +128,7 @@ function Stepper({
           type="button"
           variant="outline"
           size="icon"
-          className="size-8 rounded-full"
+          className="size-8 rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
           aria-label={`Увеличить: ${label}`}
           disabled={value >= max}
           onClick={() => onChange(value + 1)}
@@ -122,9 +140,9 @@ function Stepper({
   );
 }
 
-// Общий вид тёмных плашек-полей внутри карточки (даты, гости).
-const darkFieldClass =
-  "flex w-full cursor-pointer flex-col items-start gap-0.5 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-left transition-colors outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sun/60";
+// Поля дат: field-bg, высота 50px, radius 10px (раздел 6.5).
+const dateFieldClass =
+  "flex h-[50px] w-full cursor-pointer items-center gap-2 rounded-[10px] bg-field-bg px-3 text-left outline-none transition-colors hover:bg-[rgba(16,24,32,0.7)] focus-visible:border focus-visible:border-white/50";
 
 function DateField({
   label,
@@ -145,14 +163,18 @@ function DateField({
       aria-haspopup="dialog"
       aria-expanded={open}
       aria-controls={controls}
+      aria-label={`${label}: ${value ? value.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" }) : "не выбрано"}`}
       onClick={onClick}
-      className={cn(darkFieldClass, open && "bg-white/10")}
+      className={cn(dateFieldClass, open && "bg-[rgba(16,24,32,0.7)]")}
     >
-      <span className="flex items-center gap-1 text-[0.65rem] uppercase tracking-wide text-cream/55">
-        <CalendarDays className="size-3.5" aria-hidden />
-        {label}
+      <CalendarDays className="size-5 shrink-0 text-granite" aria-hidden />
+      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-white">
+        {formatDateShort(value)}
       </span>
-      <span className="text-sm font-semibold text-white">{formatDate(value)}</span>
+      <ChevronDown
+        className={cn("size-4 shrink-0 text-granite transition-transform", open && "rotate-180")}
+        aria-hidden
+      />
     </button>
   );
 }
@@ -196,6 +218,8 @@ export function BookingSearchForm() {
     setOpen((current) => (current === panel ? null : panel));
   }
 
+  const hasDates = Boolean(range?.from && range.to);
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -222,16 +246,20 @@ export function BookingSearchForm() {
     <form
       ref={formRef}
       onSubmit={handleSubmit}
-      className="relative flex w-full flex-col gap-4 rounded-[1.75rem] border border-white/15 bg-ink/70 p-5 text-cream shadow-2xl backdrop-blur-xl sm:p-6"
+      className="relative flex w-full flex-col gap-[18px] rounded-[24px] border border-glass-border bg-glass-bg p-[22px] text-white shadow-2xl backdrop-blur-[24px] backdrop-saturate-[1.2] sm:p-[30px]"
     >
       <div>
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-cream/55">
-          Бронирование
+        <p className="text-[22px] leading-tight font-normal text-white sm:text-[28px]">
+          {hotel.name}
         </p>
-        <p className="mt-1 text-lg font-bold text-white">{hotel.name}</p>
+        {hotel.address && (
+          <p className="mt-1 text-sm text-granite">
+            мини-отель на {hotel.address.replace("Санкт-Петербург, ", "")}
+          </p>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <DateField
           label="Заезд"
           value={range?.from}
@@ -248,18 +276,18 @@ export function BookingSearchForm() {
         />
       </div>
 
-      {/* Время заезда/выезда — факт из src/content/site.ts, не расчёт сайта. */}
-      <div className="grid grid-cols-2 divide-x divide-white/10 overflow-hidden rounded-2xl bg-white/5 text-sm">
-        <div className="px-3 py-2.5">
-          <p className="text-[0.65rem] uppercase tracking-wide text-cream/55">Заезд с</p>
-          <p className="font-medium text-white">
-            {hotel.checkInTime ?? UNKNOWN_LABEL}
+      {/* Заезд/выезд — факт из src/content/site.ts, не расчёт сайта. */}
+      <div className="grid grid-cols-2 divide-x divide-divider rounded-xl bg-field-bg">
+        <div className="px-5 py-4">
+          <p className="text-sm text-granite">Заезд</p>
+          <p className="mt-0.5 text-[15px] text-white">
+            {hotel.checkInTime ? `после ${hotel.checkInTime}` : UNKNOWN_LABEL}
           </p>
         </div>
-        <div className="px-3 py-2.5">
-          <p className="text-[0.65rem] uppercase tracking-wide text-cream/55">Выезд до</p>
-          <p className="font-medium text-white">
-            {hotel.checkOutTime ?? UNKNOWN_LABEL}
+        <div className="px-5 py-4">
+          <p className="text-sm text-granite">Выезд</p>
+          <p className="mt-0.5 text-[15px] text-white">
+            {hotel.checkOutTime ? `до ${hotel.checkOutTime}` : UNKNOWN_LABEL}
           </p>
         </div>
       </div>
@@ -272,19 +300,19 @@ export function BookingSearchForm() {
           aria-controls={guestsPanelId}
           onClick={() => toggle("guests")}
           className={cn(
-            "flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-left transition-colors outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sun/60",
-            open === "guests" && "bg-white/10",
+            "flex w-full items-center justify-between gap-3 rounded-xl bg-field-bg px-4 py-3 text-left transition-colors outline-none hover:bg-[rgba(16,24,32,0.7)]",
+            open === "guests" && "bg-[rgba(16,24,32,0.7)]",
           )}
         >
           <span className="flex items-center gap-2">
-            <User className="size-4 shrink-0 text-cream/60" aria-hidden />
-            <span className="text-sm font-semibold text-white">
+            <User className="size-4 shrink-0 text-granite" aria-hidden />
+            <span className="text-[15px] font-medium text-white">
               {guestsLabel(adults, children)}
             </span>
           </span>
           <ChevronDown
             className={cn(
-              "size-4 shrink-0 text-cream/60 transition-transform",
+              "size-4 shrink-0 text-granite transition-transform",
               open === "guests" && "rotate-180",
             )}
             aria-hidden
@@ -300,16 +328,35 @@ export function BookingSearchForm() {
           >
             <Stepper label="Взрослые" value={adults} min={1} max={10} onChange={setAdults} />
             <Stepper label="Дети" value={children} min={0} max={10} onChange={setChildren} />
-            <Button type="button" size="sm" className="rounded-full" onClick={() => setOpen(null)}>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="rounded-lg"
+              onClick={() => setOpen(null)}
+            >
               Готово
             </Button>
           </div>
         )}
       </div>
 
-      <Button type="submit" size="lg" className="h-12 w-full rounded-2xl text-base font-bold">
-        Проверить наличие
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button
+          type="submit"
+          disabled={!hasDates}
+          className="h-12 w-full rounded-[10px] text-base font-medium"
+        >
+          Забронировать
+        </Button>
+        <p className="text-[11px] leading-snug text-granite">
+          Нажимая «Забронировать», вы соглашаетесь с{" "}
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-white">
+            политикой обработки персональных данных
+          </Link>
+          .
+        </p>
+      </div>
 
       {open === "dates" && (
         <div
@@ -326,9 +373,10 @@ export function BookingSearchForm() {
           />
           <Button
             type="button"
+            variant="default"
             size="sm"
-            className="rounded-full"
-            disabled={!range?.from || !range.to}
+            className="rounded-lg"
+            disabled={!hasDates}
             onClick={() => setOpen(null)}
           >
             Готово
