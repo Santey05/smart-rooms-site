@@ -1,5 +1,6 @@
 import { BedDouble, MapPin, Star, Wallet } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { PhotoPlaceholder } from "@/components/brand/petersburg-art";
@@ -184,7 +185,16 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <figure className="overflow-hidden rounded-2xl bg-white/5">
-              <PhotoPlaceholder variant="metro" className="aspect-[3/4] w-full" />
+              <div className="relative aspect-[3/4] w-full">
+                {/* Сгенерированное фото, не реальная съёмка (CLAUDE.md раздел 7) */}
+                <Image
+                  src="/images/about-metro.webp"
+                  alt="Вечерний вход в историческое здание у метро «Владимирская», тёплый свет и мокрая мостовая"
+                  fill
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
               <figcaption className="px-3 py-2 text-sm text-white/70">
                 Метро «Владимирская» — {hotel.metroMinutes ?? "…"} минут
               </figcaption>
