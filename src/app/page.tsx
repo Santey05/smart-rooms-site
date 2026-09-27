@@ -169,22 +169,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Об отеле */}
-      <section id="about" className="scroll-mt-4 overflow-hidden bg-neva text-white">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-2 lg:items-center">
-          <div className="flex flex-col gap-5">
-            <p className="text-3xl font-bold tracking-tight sm:text-4xl">
-              <span className="block">Смарт румс — удобный старт</span>
-              <span className="block text-granite">для знакомства с Петербургом.</span>
-            </p>
-            <p className="max-w-md text-white/80">
-              Вы приходите в наш отель за отдыхом, а уезжаете с ощущением, что влюбились в этот
-              город.
-            </p>
-          </div>
-          <div className="aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-            <NeighborhoodMap />
-          </div>
+      {/* Об отеле — радиальная схема «что рядом», см. src/components/brand/neighborhood-map.tsx */}
+      <section id="about" className="scroll-mt-4 bg-neva text-white">
+        <div className="mx-auto max-w-3xl px-4 py-16">
+          <NeighborhoodMap />
         </div>
       </section>
 

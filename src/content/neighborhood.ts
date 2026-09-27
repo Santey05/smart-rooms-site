@@ -12,9 +12,14 @@ import { hotel } from "@/content/site";
  * не точная карта улиц.
  *
  * Не добавлять сюда ориентиры без проверки реального маршрута — схема
- * заявляет честные расстояния, это её единственная ценность.
+ * заявляет честные расстояния, это её единственная ценность. (Так,
+ * из готового AI-макета намеренно не взяты «Маяковская», «Александринский
+ * театр», «Галерея», «Аничков мост» — расстояния под ними не проверялись
+ * и как минимум одна цифра в том же макете, «Думская — 10–12 мин»,
+ * при проверке оказалась в два с лишним раза меньше реальной.)
  */
 export interface Landmark {
+  id: "metro" | "nevsky" | "dumskaya" | "kazan" | "vokzal";
   name: string;
   minutes: number;
   /** Азимут от отеля, градусы по часовой от севера */
@@ -22,15 +27,21 @@ export interface Landmark {
 }
 
 const OTHER_LANDMARKS: Landmark[] = [
-  { name: "Невский проспект", minutes: 12, bearingDeg: 344 },
-  { name: "Думская улица", minutes: 26, bearingDeg: 300 },
-  { name: "Казанский собор", minutes: 30, bearingDeg: 301 },
+  { id: "nevsky", name: "Невский проспект", minutes: 12, bearingDeg: 344 },
+  { id: "dumskaya", name: "Думская улица", minutes: 26, bearingDeg: 300 },
+  { id: "kazan", name: "Казанский собор", minutes: 30, bearingDeg: 301 },
+  { id: "vokzal", name: "Московский вокзал", minutes: 12, bearingDeg: 53 },
 ];
 
 export const landmarks: Landmark[] =
   hotel.metroStation && hotel.metroMinutes != null
     ? [
-        { name: `Метро «${hotel.metroStation}»`, minutes: hotel.metroMinutes, bearingDeg: 295 },
+        {
+          id: "metro",
+          name: `Метро «${hotel.metroStation}»`,
+          minutes: hotel.metroMinutes,
+          bearingDeg: 295,
+        },
         ...OTHER_LANDMARKS,
       ]
     : OTHER_LANDMARKS;
