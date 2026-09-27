@@ -1,6 +1,5 @@
 import { BedDouble, MapPin, Star, Wallet } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { PhotoPlaceholder } from "@/components/brand/petersburg-art";
@@ -52,23 +51,24 @@ export default function HomePage() {
               бронирования могут выходить за этот слой. */}
           <div className="absolute inset-0 overflow-hidden rounded-[24px] lg:rounded-[32px]">
             {/*
-              Сгенерированное фото (не реальная съёмка дома на Марата, 30 —
+              Сгенерированные фото (не реальная съёмка дома на Марата, 30 —
               собственной фотографии пока нет, см. CLAUDE.md раздел 7).
-              Один и тот же кадр 16:9 используется и на мобильных: при
-              вертикальной обрезке фонарь справа виден лишь частично, но
-              читаемость текста не страдает. Когда появится отдельный
-              вертикальный кадр — добавить <picture>/второй <Image>,
-              скрытый через lg:hidden/hidden lg:block, а не переделывать
-              этот блок целиком.
+              Отдельные кадры для десктопа (16:9) и мобильных (9:16), чтобы
+              тёплый фонарь не терялся при обрезке на узких экранах.
+              Обычный <picture>, а не next/image: у next/image нет
+              художественной обрезки по брейкпоинту (разные источники для
+              разных экранов) — с двумя <Image priority> браузер предзагрузил
+              бы оба файла сразу, независимо от того, какой скрыт по CSS.
             */}
-            <Image
-              src="/images/hero-desktop.webp"
-              alt="Вечерняя улица в историческом центре Санкт-Петербурга, фонарь и тёплые окна в тумане"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center"
-            />
+            <picture>
+              <source media="(min-width: 1024px)" srcSet="/images/hero-desktop.webp" />
+              <img
+                src="/images/hero-mobile.webp"
+                alt="Вечерняя улица в историческом центре Санкт-Петербурга, фонарь и тёплые окна в тумане"
+                fetchPriority="high"
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+            </picture>
             {/* Оверлеи читаемости (раздел 3 спецификации) */}
             <div className="absolute inset-0 bg-gradient-to-t from-[rgba(14,20,28,0.7)] from-0% to-transparent to-[45%]" />
             <div className="absolute inset-0 bg-gradient-to-r from-[rgba(14,20,28,0.4)] from-0% to-transparent to-[50%]" />
