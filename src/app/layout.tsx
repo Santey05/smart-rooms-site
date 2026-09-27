@@ -40,6 +40,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ru"
       className={`${onest.variable} ${cormorant.variable} h-full antialiased`}
+      // Гасит ложное предупреждение о гидратации, когда браузерное расширение
+      // (судя по атрибутам data-yd-* — вероятно, яндексовское) подставляет
+      // свои data-атрибуты в <html> до того, как React успел гидратировать
+      // страницу. Реальные ошибки гидратации в остальном дереве это не
+      // скрывает — suppressHydrationWarning действует только на этот тег.
+      suppressHydrationWarning
     >
       <body className="relative flex min-h-full flex-col">
         <SiteHeader />
