@@ -4,8 +4,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, type DateRange } from "react-day-picker";
 import { ru } from "react-day-picker/locale";
 
-import { cn } from "@/lib/utils";
-
 /**
  * Календарь выбора заезда/выезда в «стеклянном стиле» карточки бронирования
  * (раздел 6.5 спецификации). Ничего не проверяет, кроме «нельзя выбрать
@@ -44,10 +42,9 @@ export function DateRangeCalendar({
       startMonth={today}
       disabled={{ before: today }}
       selected={range}
-      // Тёплые состояния задаём сами (а не через range_* библиотеки): пока
+      // Тёплое состояние — только цвет цифры, без кружка и подложки (пока
       // выбран только заезд, библиотека не помечает день как начало
-      // диапазона. Подложка-«капсула» появляется, только когда выбран и
-      // выезд.
+      // диапазона, поэтому считаем сами).
       modifiers={{
         stayStart: range?.from ?? false,
         stayEnd: range?.to ?? false,
@@ -55,9 +52,9 @@ export function DateRangeCalendar({
           range?.from && range.to ? { after: range.from, before: range.to } : false,
       }}
       modifiersClassNames={{
-        stayStart: cn(dayCap, range?.to && "rounded-l-full bg-lantern/25"),
-        stayEnd: cn(dayCap, "rounded-r-full bg-lantern/25"),
-        stayMiddle: "bg-lantern/15",
+        stayStart: dayWarm,
+        stayEnd: dayWarm,
+        stayMiddle: dayWarm,
       }}
       // Управляем выбором сами: игнорируем диапазон, который считает библиотека,
       // и берём только дату клика (второй аргумент).
@@ -97,7 +94,5 @@ export function DateRangeCalendar({
 const navButton =
   "flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 outline-none disabled:cursor-not-allowed disabled:opacity-30";
 
-// Заезд/выезд: тёплый кружок. hover: нужен, чтобы серая подсветка наведения
-// (hover:bg-white/10 у day_button) не перебивала акцент сразу после клика.
-const dayCap =
-  "[&>button]:bg-lantern [&>button]:hover:bg-lantern [&>button]:text-text-dark [&>button]:font-bold";
+// Заезд, выезд и дни между ними — только цвет цифры, без кружка и подложки.
+const dayWarm = "[&>button]:text-lantern [&>button]:font-bold";
