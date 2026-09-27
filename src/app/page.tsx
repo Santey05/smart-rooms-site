@@ -2,14 +2,11 @@ import { BedDouble, MapPin, Star, Wallet } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { HeroArt, PhotoPlaceholder } from "@/components/brand/petersburg-art";
+import { LogoWordmark } from "@/components/brand/logo";
 import { BookingSearchForm } from "@/components/booking-search-form";
-import { BrushUnderline, LogoSign } from "@/components/brand/logo";
-import {
-  HeroArt,
-  PhotoPlaceholder,
-  SketchArt,
-} from "@/components/brand/petersburg-art";
 import { ContactList } from "@/components/contact-list";
+import { NAV_LINKS } from "@/lib/nav";
 import { Button } from "@/components/ui/button";
 import { hotel } from "@/content/site";
 
@@ -47,62 +44,79 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* Hero */}
-      <section className="relative z-10 flex min-h-[46rem] flex-col justify-end bg-ink text-white">
-        {/* overflow-hidden только у слоя с иллюстрацией: панели формы поиска
-            раскрываются вниз и должны выходить за нижний край hero */}
-        <div className="absolute inset-0 overflow-hidden">
-          <HeroArt />
-          <div className="absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink/30" />
-        </div>
-
-        <div className="relative mx-auto flex w-full max-w-6xl flex-1 items-center px-4 pb-8 pt-32">
-          <LogoSign className="mr-10 hidden shrink-0 -rotate-2 lg:block" />
-          <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 text-center lg:mr-auto lg:ml-0 lg:items-start lg:text-left">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-white/85">
-              Санкт-Петербург
-            </p>
-            <h1 className="font-hand text-6xl font-bold leading-[0.95] sm:text-8xl">
-              Ближе, чем
-              <br />
-              кажется
-            </h1>
-            <BrushUnderline className="h-3 w-56 sm:w-72" />
-            <p className="text-lg text-white/90 sm:text-xl">
-              Уютный и недорогой мини-отель
-              <br />в самом сердце Петербурга
-            </p>
-            {hotel.address && (
-              <p className="flex items-center gap-2 font-semibold text-sun">
-                <MapPin className="size-5" aria-hidden />
-                {hotel.address.replace("Санкт-Петербург, ", "")}
-              </p>
-            )}
+      {/* Hero: врезанная карточка со скруглёнными углами — навигация,
+          заголовок и карточка бронирования лежат внутри одной иллюстрации. */}
+      <div className="p-3 sm:p-4 lg:p-5">
+        <section className="relative isolate flex min-h-[42rem] flex-col overflow-visible rounded-[1.75rem] bg-ink text-white shadow-[0_40px_100px_-30px_oklch(0.21_0.04_265/0.6)] sm:rounded-[2.25rem] lg:min-h-[46rem]">
+          {/* Иллюстрация — временная замена фото (CLAUDE.md, раздел 7); слой
+              обрезан по скруглению, панели формы поиска могут выходить за него. */}
+          <div className="absolute inset-0 overflow-hidden rounded-[1.75rem] sm:rounded-[2.25rem]">
+            <HeroArt />
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/5 to-ink/45" />
           </div>
-        </div>
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 pb-8">
-          <BookingSearchForm />
-        </div>
-      </section>
+          {/* Навигация внутри карточки */}
+          <nav
+            aria-label="Основная навигация"
+            className="relative z-10 flex items-center justify-between gap-4 px-5 py-5 sm:px-8 sm:py-6"
+          >
+            <Link href="/" aria-label="Смарт Румс — на главную">
+              <LogoWordmark />
+            </Link>
+            <ul className="hidden items-center gap-6 text-sm text-white/80 md:flex">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-white">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Button asChild className="rounded-full px-5 font-semibold">
+              <Link href="/booking">Забронировать</Link>
+            </Button>
+          </nav>
+
+          {/* Заголовок + карточка бронирования */}
+          <div className="relative z-10 flex flex-1 flex-col justify-end gap-8 px-5 pb-6 sm:px-8 sm:pb-8 lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-12 lg:pb-12">
+            <div className="max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
+                Санкт-Петербург
+              </p>
+              <h1 className="mt-3 text-6xl font-bold leading-[0.92] tracking-tight sm:text-7xl lg:text-8xl">
+                <span className="block">Ближе,</span>
+                <span className="block text-white/40">чем</span>
+                <span className="block">кажется</span>
+              </h1>
+              <p className="mt-6 max-w-sm text-base text-white/80 sm:text-lg">
+                Уютный и недорогой мини-отель в самом сердце Петербурга.
+              </p>
+              {hotel.address && (
+                <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-sun">
+                  <MapPin className="size-4 shrink-0" aria-hidden />
+                  {hotel.address.replace("Санкт-Петербург, ", "")}
+                  {hotel.metroNote && (
+                    <span className="font-normal text-white/60">· {hotel.metroNote}</span>
+                  )}
+                </p>
+              )}
+            </div>
+
+            <div className="w-full lg:w-[22rem] lg:shrink-0">
+              <BookingSearchForm />
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* Почему выбирают */}
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-2 lg:items-center">
-        <div className="relative">
-          <p className="font-hand text-3xl font-bold leading-tight -rotate-3 sm:text-4xl">
-            Питер — это не просто город.
-            <br />
-            Это состояние души.
-          </p>
-          <BrushUnderline className="mt-1 h-3 w-48 -rotate-3" />
-          <SketchArt className="mt-4 w-full max-w-md text-ink/80" />
-        </div>
+      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <p className="text-3xl font-bold leading-[1.05] tracking-tight sm:text-4xl">
+          <span className="block text-foreground">Питер — это не просто город.</span>
+          <span className="block text-muted-foreground">Это состояние души.</span>
+        </p>
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            Почему выбирают
-            <br />
-            Смарт Румс?
-          </h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">Почему выбирают Смарт Румс</h2>
           <ul className="mt-8 grid gap-8 sm:grid-cols-2">
             {BENEFITS.map(({ icon: Icon, title, text }) => (
               <li key={title} className="flex gap-4">
@@ -123,26 +137,25 @@ export default function HomePage() {
       <section id="about" className="scroll-mt-4 overflow-hidden bg-ink text-cream">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-2 lg:items-center">
           <div className="flex flex-col gap-5">
-            <h2 className="font-hand text-4xl font-bold leading-tight sm:text-5xl">
-              Смарт Румс — ваш удобный старт для знакомства с{" "}
-              <span className="text-sun">Петербургом</span>
-            </h2>
-            <BrushUnderline className="h-3 w-56" />
-            <p className="max-w-md text-cream/85">
+            <p className="text-3xl font-bold leading-[1.05] tracking-tight sm:text-4xl">
+              <span className="block">Смарт Румс — ваш удобный старт</span>
+              <span className="block text-cream/50">для знакомства с Петербургом.</span>
+            </p>
+            <p className="max-w-md text-cream/80">
               Вы приходите в наш отель за отдыхом, а уезжаете с ощущением, что
               влюбились в этот город.
             </p>
           </div>
-          <div className="relative mx-auto flex w-full max-w-lg items-start justify-center gap-4">
-            <figure className="w-1/2 -rotate-3 rounded-sm bg-white p-2 pb-8 text-ink shadow-xl">
+          <div className="grid grid-cols-2 gap-4">
+            <figure className="overflow-hidden rounded-2xl bg-white/5">
               <PhotoPlaceholder variant="metro" className="aspect-[3/4] w-full" />
-              <figcaption className="mt-2 text-center font-hand text-lg">
+              <figcaption className="px-3 py-2 text-sm text-cream/70">
                 Метро — 2 минуты
               </figcaption>
             </figure>
-            <figure className="mt-8 w-1/2 rotate-3 rounded-sm bg-white p-2 pb-8 text-ink shadow-xl">
+            <figure className="mt-8 overflow-hidden rounded-2xl bg-white/5">
               <PhotoPlaceholder variant="embankment" className="aspect-[3/4] w-full" />
-              <figcaption className="mt-2 text-center font-hand text-lg">
+              <figcaption className="px-3 py-2 text-sm text-cream/70">
                 Набережные, дворцы, музеи
               </figcaption>
             </figure>
@@ -152,7 +165,7 @@ export default function HomePage() {
 
       {/* Номера — общий блок без карточек/цен, см. CLAUDE.md раздел 5 */}
       <section id="rooms" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-16">
-        <div className="grid gap-8 rounded-3xl bg-card p-8 shadow-sm sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-8 rounded-[1.75rem] bg-card p-8 shadow-sm sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="flex max-w-2xl flex-col gap-4">
             <h2 className="text-3xl font-extrabold tracking-tight">Номера</h2>
             <p className="text-muted-foreground">

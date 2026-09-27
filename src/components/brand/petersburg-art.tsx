@@ -110,41 +110,6 @@ export function HeroArt() {
   );
 }
 
-/** Линейный набросок (собор + фонарь) для светлого блока. */
-export function SketchArt({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 420 300"
-      aria-hidden
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* фонарь */}
-      <path d="M50 290 V90 M42 290 h16 M50 90 q-22 -4 -22 -30 M50 90 q22 -4 22 -30" />
-      <path d="M38 60 h24 l-4 -20 h-16 z M50 40 v-14 M44 26 h12" />
-      <path d="M40 190 q10 -10 20 0" />
-      {/* собор */}
-      <path d="M170 290 V220 H370 V290 M170 220 L270 196 L370 220" />
-      <path d="M215 220 V160 H325 V220 M215 160 Q270 60 325 160" />
-      <path d="M270 88 V64 M262 64 h16" />
-      {Array.from({ length: 9 }).map((_, i) => (
-        <path key={i} d={`M${182 + i * 22} 224 V288`} strokeWidth="1" />
-      ))}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <path key={i} d={`M${222 + i * 18} 166 V218`} strokeWidth="1" />
-      ))}
-      <path d="M178 220 V196 q10 -14 20 0 V220 M342 220 V196 q10 -14 20 0 V220" />
-      {/* деревья и земля */}
-      <path d="M100 290 q4 -40 -14 -60 M120 290 q-2 -50 14 -78 M380 290 q8 -30 30 -40" />
-      <path d="M0 292 H420" strokeWidth="1" />
-    </svg>
-  );
-}
-
 /** Градиентная «открытка» вместо фото для полароидов. */
 export function PhotoPlaceholder({
   variant,

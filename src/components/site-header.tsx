@@ -5,31 +5,17 @@ import { usePathname } from "next/navigation";
 
 import { LogoWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-const NAV_LINKS = [
-  { href: "/#about", label: "О нас" },
-  { href: "/#rooms", label: "Номера" },
-  { href: "/#location", label: "Расположение" },
-  { href: "/contacts", label: "Контакты" },
-] as const;
+import { NAV_LINKS } from "@/lib/nav";
 
 /**
- * На главной шапка лежит поверх hero (белый текст), на остальных страницах —
- * обычная светлая полоса.
+ * На главной навигация встроена в верхнюю часть hero-карточки (см. HomePage) —
+ * здесь она не дублируется. На остальных страницах — обычная светлая полоса.
  */
 export function SiteHeader() {
-  const overlay = usePathname() === "/";
+  if (usePathname() === "/") return null;
 
   return (
-    <header
-      className={cn(
-        "z-20 w-full",
-        overlay
-          ? "absolute inset-x-0 top-0 text-white"
-          : "border-b bg-background text-foreground",
-      )}
-    >
+    <header className="z-20 w-full border-b bg-background text-foreground">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4">
         <Link href="/" aria-label="Смарт Румс — на главную">
           <LogoWordmark />
@@ -38,7 +24,7 @@ export function SiteHeader() {
           <ul className="hidden items-center gap-6 md:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="opacity-90 hover:opacity-100">
+                <Link href={link.href} className="text-foreground/70 hover:text-foreground">
                   {link.label}
                 </Link>
               </li>
