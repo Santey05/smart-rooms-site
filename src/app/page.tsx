@@ -1,8 +1,9 @@
 import { BedDouble, MapPin, Star, Wallet } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
-import { HeroArt, PhotoPlaceholder } from "@/components/brand/petersburg-art";
+import { PhotoPlaceholder } from "@/components/brand/petersburg-art";
 import { LogoWordmark } from "@/components/brand/logo";
 import { BookingSearchForm } from "@/components/booking-search-form";
 import { ContactList } from "@/components/contact-list";
@@ -50,7 +51,24 @@ export default function HomePage() {
           {/* Фото/иллюстрация — обрезана по скруглению; попапы карточки
               бронирования могут выходить за этот слой. */}
           <div className="absolute inset-0 overflow-hidden rounded-[24px] lg:rounded-[32px]">
-            <HeroArt />
+            {/*
+              Сгенерированное фото (не реальная съёмка дома на Марата, 30 —
+              собственной фотографии пока нет, см. CLAUDE.md раздел 7).
+              Один и тот же кадр 16:9 используется и на мобильных: при
+              вертикальной обрезке фонарь справа виден лишь частично, но
+              читаемость текста не страдает. Когда появится отдельный
+              вертикальный кадр — добавить <picture>/второй <Image>,
+              скрытый через lg:hidden/hidden lg:block, а не переделывать
+              этот блок целиком.
+            */}
+            <Image
+              src="/images/hero-desktop.webp"
+              alt="Вечерняя улица в историческом центре Санкт-Петербурга, фонарь и тёплые окна в тумане"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
             {/* Оверлеи читаемости (раздел 3 спецификации) */}
             <div className="absolute inset-0 bg-gradient-to-t from-[rgba(14,20,28,0.7)] from-0% to-transparent to-[45%]" />
             <div className="absolute inset-0 bg-gradient-to-r from-[rgba(14,20,28,0.4)] from-0% to-transparent to-[50%]" />
