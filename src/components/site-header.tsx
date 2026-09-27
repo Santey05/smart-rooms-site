@@ -30,9 +30,11 @@ export function SiteHeader() {
 }
 
 /**
- * Содержимое навигации: ссылки, быстрый контакт, RU/EN, кнопка
- * «Забронировать» (раздел 6.1). Используется и здесь, и внутри
- * hero-карточки на главной — оттуда и variant="overlay".
+ * Содержимое навигации: ссылки, быстрый контакт, кнопка «Забронировать»
+ * (раздел 6.1 спецификации; переключатель RU/EN из спецификации не
+ * добавлен — на сайте только русский текст, английской версии нет).
+ * Используется и здесь, и внутри hero-карточки на главной — оттуда и
+ * variant="overlay".
  */
 export function HeaderNav({ variant }: { variant: "light" | "overlay" }) {
   const dim = variant === "overlay" ? "text-white/80" : "text-foreground/70";
@@ -75,14 +77,6 @@ export function HeaderNav({ variant }: { variant: "light" | "overlay" }) {
           )}
         </div>
       )}
-
-      <div className={`flex items-center gap-1.5 text-sm ${dim}`}>
-        <span className={variant === "overlay" ? "text-white" : "text-foreground"}>RU</span>
-        <span aria-hidden>/</span>
-        <span aria-disabled title="Скоро" className="cursor-not-allowed">
-          EN
-        </span>
-      </div>
 
       <Button
         asChild
