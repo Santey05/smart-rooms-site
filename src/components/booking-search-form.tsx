@@ -190,13 +190,25 @@ export function BookingSearchForm() {
 
   // today фиксируем один раз на монтирование, чтобы календарь не «прыгал».
   const [today] = useState(startOfToday);
-  const [range, setRange] = useState<DateRange | undefined>(() => ({
-    from: addDays(startOfToday(), 1),
-    to: addDays(startOfToday(), 2),
-  }));
+  // undefined на первом рендере — совпадает с тем, что видит сервер. Страница
+  // собирается статически, и если вычислять «сегодня+1/+2» прямо здесь, эти
+  // даты застынут на моменте сборки: у гостя, открывшего сайт хоть днём
+  // позже, при гидратации получится расхождение (React честно ловит это как
+  // ошибку гидратации — «сегодня» на сервере и на клиенте разное). Даты по
+  // умолчанию выставляются ниже в useEffect — уже после гидратации, обычным
+  // обновлением состояния, а не частью SSR-рендера.
+  const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [open, setOpen] = useState<OpenPanel>(null);
+
+  // Значение зависит от Date и должно появиться уже после гидратации, не
+  // участвуя в сверке сервер/клиент (см. комментарий у range выше) — «лишний
+  // ре-рендер», от которого предостерегает правило ниже, тут и есть цель.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRange({ from: addDays(startOfToday(), 1), to: addDays(startOfToday(), 2) });
+  }, []);
 
   // Закрываем панели по клику вне формы и по Escape.
   useEffect(() => {
