@@ -293,14 +293,13 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   if (!hotel.coords) return null;
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-border" style={{ background: NAVY }}>
-      <div className="relative h-[420px] w-full sm:h-[520px] lg:h-[680px]">
-        <Script
-          src={`https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`}
-          strategy="afterInteractive"
-          onReady={() => setScriptReady(true)}
-        />
-        <style>{`
+    <div className="relative h-[420px] w-full border-t border-white/10 sm:h-[520px] lg:h-[680px]">
+      <Script
+        src={`https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`}
+        strategy="afterInteractive"
+        onReady={() => setScriptReady(true)}
+      />
+      <style>{`
           #${MAP_ELEMENT_ID} [class*="ground-pane"] {
             filter: saturate(0.55) brightness(1.04) contrast(0.95);
           }
@@ -353,8 +352,7 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
             color: ${GOLD};
           }
         `}</style>
-        <div id={MAP_ELEMENT_ID} className="h-full w-full" />
-      </div>
+      <div id={MAP_ELEMENT_ID} className="h-full w-full" />
     </div>
   );
 }

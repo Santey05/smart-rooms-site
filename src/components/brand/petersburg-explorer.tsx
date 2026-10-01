@@ -149,14 +149,9 @@ export function PetersburgExplorer() {
             ))}
           </div>
         </nav>
+
+        <HotelMap activeId={selectedId} onSelect={setSelectedId} />
       </div>
-
-      <p className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-        <span className="block text-foreground">Это не точки на карте,</span>
-        <span className="block text-muted-foreground">а маршруты, которые вы правда пройдёте.</span>
-      </p>
-
-      <HotelMap activeId={selectedId} onSelect={setSelectedId} />
     </div>
   );
 }
