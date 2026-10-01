@@ -5,6 +5,7 @@ import { hotel, stayRules, UNKNOWN_LABEL } from "@/content/site";
 export const metadata: Metadata = {
   title: "Правила проживания",
   description: "Время заезда и выезда, правила проживания в мини-отеле «Смарт румс».",
+  alternates: { canonical: "/rules" },
 };
 
 export default function RulesPage() {

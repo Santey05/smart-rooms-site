@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Onest } from "next/font/google";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 // Шрифты дизайна (раздел 4 спецификации): Onest — гротеск интерфейса,
@@ -26,13 +27,35 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const TITLE = "Смарт румс — мини-отель на Марата, 30, Санкт-Петербург";
+const DESCRIPTION =
+  "Мини-отель в доме 1860 года на улице Марата. Пять минут пешком до метро «Владимирская».";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Смарт румс — мини-отель на Марата, 30, Санкт-Петербург",
+    default: TITLE,
     template: "%s · Смарт румс",
   },
-  description:
-    "Мини-отель в доме 1860 года на улице Марата. Пять минут пешком до метро «Владимирская».",
+  description: DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Смарт румс",
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    images: [{ url: "/images/hero-desktop.webp", width: 2000, height: 1116, alt: TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/images/hero-desktop.webp"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Бронирование",
   description: "Выберите номер и даты — бронирование и оплата онлайн.",
   robots: { index: false, follow: false },
+  alternates: { canonical: "/booking" },
 };
 
 // useSearchParams в BnovoBookingModule требует Suspense-границы для

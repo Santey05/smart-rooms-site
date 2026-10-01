@@ -5,6 +5,7 @@ import { privacyOperator, UNKNOWN_LABEL } from "@/content/site";
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
   description: "Как обрабатываются персональные данные на сайте мини-отеля «Смарт румс».",
+  alternates: { canonical: "/privacy" },
 };
 
 // Каркас политики. Юридический текст (цели, правовые основания, сроки

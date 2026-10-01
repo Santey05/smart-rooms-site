@@ -10,12 +10,48 @@ import { ContactList } from "@/components/contact-list";
 import { HeaderNav } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { hotel } from "@/content/site";
+import { SITE_URL } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Смарт румс — мини-отель на Марата, 30, Санкт-Петербург",
   description:
     "Мини-отель в доме 1860 года на улице Марата. Пять минут пешком до метро «Владимирская».",
+  alternates: { canonical: "/" },
 };
+
+/**
+ * Структурированные данные Hotel/schema.org — только на главной (CLAUDE.md,
+ * раздел 7). Поля собираются из content/site.ts; то, чего ещё не знаем
+ * (null), просто не попадает в разметку — вместо «Уточняется» в JSON-LD
+ * должно быть либо реальное значение, либо отсутствие поля.
+ */
+function buildHotelJsonLd() {
+  if (!hotel.address) return null;
+
+  const [addressLocality, ...rest] = hotel.address.split(",").map((part) => part.trim());
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Hotel",
+    name: hotel.name,
+    url: SITE_URL,
+    image: `${SITE_URL}/images/room/overview.jpg`,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: rest.join(", "),
+      addressLocality,
+      addressCountry: "RU",
+    },
+    ...(hotel.coords && {
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: hotel.coords.lat,
+        longitude: hotel.coords.lon,
+      },
+    }),
+    ...(hotel.phone && { telephone: hotel.phone }),
+  };
+}
 
 const BENEFITS = [
   {
@@ -42,9 +78,13 @@ const BENEFITS = [
 
 export default function HomePage() {
   const mapHref = `https://yandex.ru/maps/?text=${encodeURIComponent(hotel.address ?? "")}`;
+  const hotelJsonLd = buildHotelJsonLd();
 
   return (
     <main>
+      {hotelJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelJsonLd) }} />
+      )}
       {/* Hero — по дизайн-спецификации hero-экрана (Sep 27, 2026).
           max-w-7xl — та же ширина, что и у остальных секций страницы, иначе
           на очень широких мониторах карточка растягивается непропорционально. */}
