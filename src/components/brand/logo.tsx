@@ -1,31 +1,24 @@
 import { cn } from "@/lib/utils";
+import { hotel } from "@/content/site";
 
 /**
- * Знак — контур петербургского арочного окна с тёплой точкой света внутри
- * (раздел 6.1 спецификации). Абстрактный, не воспроизводит герб или чужой
- * символ.
+ * Решено (чат, 2026-10-01): без иконки-знака, только надпись — несколько
+ * вариантов значка (окно, ключ, табличка, мост, крыша) не понравились.
+ * Разделитель и двухстрочный тег «Мини-отель на Марата, 30» — без своего
+ * фона, просто буквы и полоса; цвет наследуется от родителя (currentColor),
+ * поэтому одинаково читается и на тёмном хиро, и на светлой шапке.
  */
-export function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 22 26" aria-hidden className={cn("h-[26px] w-[22px] shrink-0", className)}>
-      <path
-        d="M1 25V11.5C1 5.7 5.5 1 11 1s10 4.7 10 10.5V25"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <circle cx="11" cy="12.5" r="2.4" className="fill-lantern" />
-    </svg>
-  );
-}
-
-/** Логотип для навигации: знак + название. */
 export function LogoWordmark({ className }: { className?: string }) {
+  const tagline = hotel.address?.replace("Санкт-Петербург, ул. ", "на ");
+
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark />
-      <span className="text-[22px] leading-none font-normal">Смарт румс</span>
+    <span className={cn("inline-flex items-center gap-3", className)}>
+      <span className="text-lg leading-none font-bold tracking-wide uppercase">Смарт румс</span>
+      <span className="h-7 w-px shrink-0 bg-current opacity-25" aria-hidden />
+      <span className="flex flex-col text-[11px] leading-[1.35] opacity-60">
+        <span>Мини-отель</span>
+        {tagline && <span>{tagline}</span>}
+      </span>
     </span>
   );
 }
