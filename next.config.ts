@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Самодостаточная сборка для Docker-деплоя (Amvera, см. Dockerfile) —
+  // в .next/standalone попадают только реально нужные файлы из
+  // node_modules, не весь node_modules целиком.
+  output: "standalone",
 };
 
 // Без NEXT_PUBLIC_SENTRY_DSN (см. .env.example) SDK сам себя не

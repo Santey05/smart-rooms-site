@@ -1,0 +1,14 @@
+# Конфигурация деплоя на Amvera (https://docs.amvera.ru) — собственный
+# Dockerfile (см. комментарий в нём) вместо управляемого toolchain.
+meta:
+  environment: docker
+  toolchain:
+    name: docker
+
+build:
+  dockerfile: Dockerfile
+
+run:
+  # Должен совпадать с PORT/EXPOSE в Dockerfile — иначе Amvera молча
+  # проксирует не туда (сборка пройдёт, а запросы не достучатся).
+  containerPort: 3000
