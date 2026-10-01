@@ -295,6 +295,7 @@ export function BookingSearchForm() {
           aria-haspopup="dialog"
           aria-expanded={open === "guests"}
           aria-controls={guestsPanelId}
+          aria-label={`Гости: ${guestsLabel(adults, children)}`}
           onClick={() => toggle("guests")}
           className={cn(
             "flex w-full items-center justify-between gap-3 rounded-xl bg-field-bg px-4 py-3 text-left transition-colors outline-none hover:bg-[rgba(16,24,32,0.7)]",
