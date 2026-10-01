@@ -19,7 +19,7 @@ export function SiteHeader() {
 
   return (
     <header className="z-20 w-full border-b border-border bg-background text-foreground">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4">
         <Link href="/" aria-label="Смарт румс — на главную">
           <LogoWordmark />
         </Link>

@@ -3,6 +3,5 @@
 export const NAV_LINKS = [
   { href: "/#rooms", label: "Номера" },
   { href: "/#location", label: "Петербург рядом" },
-  { href: "/#about", label: "Об отеле" },
   { href: "/contacts", label: "Контакты" },
 ] as const;

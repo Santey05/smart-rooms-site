@@ -14,6 +14,8 @@ export interface HotelInfo {
   name: string;
   /** Полный почтовый адрес */
   address: string | null;
+  /** Координаты для карты (источник — Яндекс Карты, геокодирование адреса) */
+  coords: { lat: number; lon: number } | null;
   /** Год постройки дома, если известен (источник — 2ГИС) */
   builtYear: number | null;
   /** Ближайшая станция метро */
@@ -40,6 +42,7 @@ export interface HotelInfo {
 export const hotel: HotelInfo = {
   name: "Смарт румс",
   address: "Санкт-Петербург, ул. Марата, 30",
+  coords: { lat: 59.926381, lon: 30.35269 },
   builtYear: 1860,
   metroStation: "Владимирская",
   metroMinutes: 5,

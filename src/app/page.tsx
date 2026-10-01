@@ -1,9 +1,10 @@
 import { BedDouble, MapPin, Star, Wallet } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { LogoWordmark } from "@/components/brand/logo";
-import { NeighborhoodMap } from "@/components/brand/neighborhood-map";
+import { PetersburgExplorer } from "@/components/brand/petersburg-explorer";
 import { BookingSearchForm } from "@/components/booking-search-form";
 import { ContactList } from "@/components/contact-list";
 import { HeaderNav } from "@/components/site-header";
@@ -44,8 +45,10 @@ export default function HomePage() {
 
   return (
     <main>
-      {/* Hero — по дизайн-спецификации hero-экрана (Sep 27, 2026). */}
-      <div className="p-2 sm:p-3 md:p-6 lg:p-12">
+      {/* Hero — по дизайн-спецификации hero-экрана (Sep 27, 2026).
+          max-w-7xl — та же ширина, что и у остальных секций страницы, иначе
+          на очень широких мониторах карточка растягивается непропорционально. */}
+      <div className="mx-auto max-w-7xl p-2 sm:p-3 md:p-6 lg:p-12">
         <section className="relative isolate flex flex-col overflow-visible rounded-[24px] bg-neva text-white shadow-[0_40px_100px_-30px_rgba(14,20,28,0.6)] lg:min-h-[min(900px,calc(100vh-6rem))] lg:rounded-[32px]">
           {/* Фото/иллюстрация — обрезана по скруглению; попапы карточки
               бронирования могут выходить за этот слой. */}
@@ -146,14 +149,14 @@ export default function HomePage() {
       </div>
 
       {/* Почему выбирают */}
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 pb-28 lg:grid-cols-2 lg:items-center lg:gap-16 lg:pb-16">
+      <section className="mx-auto grid max-w-7xl gap-10 px-2 py-16 pb-28 sm:px-3 md:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-12 lg:pb-16">
         <p className="text-3xl font-bold tracking-tight sm:text-4xl">
           <span className="block text-foreground">Петербург — не открыточный вид,</span>
           <span className="block text-muted-foreground">а место, где вы живёте.</span>
         </p>
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Почему выбирают Смарт румс</h2>
-          <ul className="mt-8 grid gap-8 sm:grid-cols-2">
+          <ul className="mt-8 grid items-start gap-8 sm:grid-cols-2">
             {BENEFITS.map(({ icon: Icon, title, text }) => (
               <li key={title} className="flex gap-4">
                 <span className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-lantern">
@@ -169,55 +172,97 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Об отеле — радиальная схема «что рядом», см. src/components/brand/neighborhood-map.tsx */}
-      <section id="about" className="scroll-mt-4 bg-neva text-white">
-        <div className="mx-auto max-w-3xl px-4 py-16">
-          <NeighborhoodMap />
-        </div>
-      </section>
-
       {/* Номера — общий блок без карточек/цен, см. CLAUDE.md раздел 5 */}
-      <section id="rooms" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-16">
-        <div className="grid gap-8 rounded-[24px] bg-card p-8 shadow-sm sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div className="flex max-w-2xl flex-col gap-4">
-            <h2 className="text-3xl font-bold tracking-tight">Номера</h2>
-            <p className="text-muted-foreground">
-              У нас несколько типов номеров — от уютных двухместных до просторных семейных,
-              рассчитанных на большую компанию. Актуальные фото, описания, цены и наличие на
-              конкретные даты вы увидите на странице бронирования.
-            </p>
+      <section
+        id="rooms"
+        className="mx-auto max-w-7xl scroll-mt-4 px-2 py-16 sm:px-3 md:px-6 lg:px-12"
+      >
+        <div className="overflow-hidden rounded-[24px] bg-card shadow-sm">
+          {/* Реальные фото одного из номеров (не постановочные) — общая
+              атмосфера, без привязки к конкретному названию/типу/цене
+              (раздел 5 CLAUDE.md: каталога номеров на сайте нет, это
+              маркетинговое фото, а не RoomContent). */}
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 sm:grid-rows-2 sm:gap-1.5">
+            <div className="relative col-span-2 aspect-[16/10] sm:aspect-auto sm:row-span-2">
+              <Image
+                src="/images/room/overview.jpg"
+                alt="Номер «Смарт румс»: спальная зона и кухонная ниша"
+                fill
+                sizes="(min-width: 640px) 40vw, 90vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-square">
+              <Image
+                src="/images/room/lounge.jpg"
+                alt="Номер «Смарт румс»: диван и дополнительные спальные места"
+                fill
+                sizes="20vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-square">
+              <Image
+                src="/images/room/bed-detail.jpg"
+                alt="Кровать в номере «Смарт румс», застеленная к заезду"
+                fill
+                sizes="20vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-square">
+              <Image
+                src="/images/room/entry.jpg"
+                alt="Прихожая и санузел в номере «Смарт румс»"
+                fill
+                sizes="20vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="relative aspect-square">
+              <Image
+                src="/images/room/lounge-alt.jpg"
+                alt="Номер «Смарт румс»: зона отдыха"
+                fill
+                sizes="20vw"
+                className="object-cover"
+              />
+            </div>
           </div>
-          <Button asChild variant="dark" className="h-14 rounded-[10px] px-8 text-base">
-            <Link href="/booking">Смотреть номера и цены</Link>
-          </Button>
+
+          <div className="grid gap-8 p-8 sm:p-12 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="flex max-w-2xl flex-col gap-3">
+              <h2 className="text-3xl font-bold tracking-tight">Номера</h2>
+              <p className="text-muted-foreground">
+                У нас несколько типов номеров — от уютных двухместных до просторных семейных,
+                рассчитанных на большую компанию. Актуальные фото, описания, цены и наличие на
+                конкретные даты вы увидите на странице бронирования.
+              </p>
+            </div>
+            <Button asChild variant="dark" className="h-14 rounded-[10px] px-8 text-base">
+              <Link href="/booking">Смотреть номера и цены</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
-      {/* Петербург рядом */}
+      {/* Петербург рядом — редакционный блок «одно место за раз» +
+          карта, см. src/components/brand/petersburg-explorer.tsx */}
       <section
         id="location"
-        className="mx-auto flex max-w-6xl scroll-mt-4 flex-col gap-4 px-4 pb-16"
+        className="mx-auto max-w-7xl scroll-mt-4 px-2 pb-16 sm:px-3 md:px-6 lg:px-12"
       >
-        <h2 className="text-3xl font-bold tracking-tight">Петербург рядом</h2>
-        <p className="max-w-2xl text-muted-foreground">
-          {hotel.address}
-          {hotel.metroStation &&
-            hotel.metroMinutes != null &&
-            ` · ${hotel.metroMinutes} мин пешком до метро «${hotel.metroStation}»`}
+        <p className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
+          <span className="block text-foreground">Это не список достопримечательностей,</span>
+          <span className="block text-muted-foreground">а то, что будет у вас под окнами.</span>
         </p>
-        <div>
-          <Button asChild variant="outline" className="rounded-[10px]">
-            <a href={mapHref} target="_blank" rel="noopener noreferrer">
-              Открыть на карте
-            </a>
-          </Button>
-        </div>
+        <PetersburgExplorer />
       </section>
 
       {/* Контакты — данные из src/content/site.ts */}
       <section
         id="contacts"
-        className="mx-auto flex max-w-6xl scroll-mt-4 flex-col gap-4 px-4 pb-20"
+        className="mx-auto flex max-w-7xl scroll-mt-4 flex-col gap-4 px-2 pb-20 sm:px-3 md:px-6 lg:px-12"
       >
         <h2 className="text-3xl font-bold tracking-tight">Контакты</h2>
         <div className="max-w-xl">
