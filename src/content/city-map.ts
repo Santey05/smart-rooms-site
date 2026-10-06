@@ -24,6 +24,17 @@ export type MapPointId =
 // "metro" не иконка Lucide, а собственный значок «М» в кружке.
 export type MapPointIcon = "metro" | "vokzal" | "nevsky" | "bar" | "bridge" | "theater" | "gallery";
 
+/** Что это за место — подпись категории рядом с названием (карта, блок «Петербург»). */
+export const CATEGORY_LABEL: Record<MapPointIcon, string> = {
+  metro: "Метро",
+  vokzal: "Вокзал",
+  nevsky: "Проспект",
+  bar: "Улица",
+  bridge: "Мост",
+  theater: "Театр",
+  gallery: "Торговый центр",
+};
+
 export interface MapPoint {
   id: MapPointId;
   name: string;

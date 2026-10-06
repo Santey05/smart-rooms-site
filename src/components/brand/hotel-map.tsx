@@ -5,7 +5,13 @@ import type { ComponentType, SVGProps } from "react";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 
-import { CITY_MAP_POINTS, type MapPoint, type MapPointIcon, type MapPointId } from "@/content/city-map";
+import {
+  CATEGORY_LABEL,
+  CITY_MAP_POINTS,
+  type MapPoint,
+  type MapPointIcon,
+  type MapPointId,
+} from "@/content/city-map";
 import { hotel } from "@/content/site";
 
 /**
@@ -145,9 +151,13 @@ function pointPinHtml(point: MapPoint): string {
       style="width:40px;height:40px;"
       role="button"
       tabindex="0"
-      aria-label="${point.name} — ${point.minutes} минут пешком"
+      aria-label="${CATEGORY_LABEL[point.icon]} ${point.name} — ${point.minutes} минут пешком"
     >
       ${iconMarkup}
+      <div class="hm-pin__label" aria-hidden="true">
+        <span class="hm-pin__label-name">${point.name}</span>
+        <span class="hm-pin__label-meta">${CATEGORY_LABEL[point.icon]} · ${point.minutes} мин пешком</span>
+      </div>
     </div>
   `;
 }
@@ -235,6 +245,10 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
         center: [coords.lat, coords.lon],
         zoom: 14,
         controls: ["zoomControl"],
+        // Масштаб меняется только кнопками +/− (zoomControl выше): колесо
+        // мыши, двойной клик, правая кнопка и pinch отключены — иначе карта
+        // перехватывает прокрутку страницы. Оставлено только перетаскивание.
+        behaviors: ["drag"],
       });
       mapRef.current = map;
 
@@ -251,6 +265,8 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
           iconLayout: ymaps.templateLayoutFactory.createClass(pointPinHtml(point)),
           iconShape: { type: "Circle", coordinates: [20, 20], radius: 20 },
           iconOffset: [-20, -20],
+          // Подпись наведённой метки должна лежать поверх соседних меток.
+          zIndexHover: 1000,
         });
         placemark.events.add("click", () => window.__hotelMapSelect?.(point.id));
         placemark.events.add("mouseenter", () => {
@@ -304,6 +320,7 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
             filter: saturate(0.55) brightness(1.04) contrast(0.95);
           }
           .hm-pin {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -324,6 +341,40 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
             border-width: 5px;
             box-shadow: 0 0 0 6px rgba(217, 164, 65, 0.18), 0 6px 20px rgba(0, 0, 0, 0.45);
             cursor: default;
+          }
+          .hm-pin__label {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            white-space: nowrap;
+            line-height: 1.25;
+            background: ${NAVY};
+            border-radius: 8px;
+            padding: 4px 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+          }
+          .hm-pin--hover .hm-pin__label,
+          .hm-pin:focus-visible .hm-pin__label {
+            opacity: 1;
+            visibility: visible;
+          }
+          .hm-pin__label-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+          }
+          .hm-pin__label-meta {
+            font-size: 10px;
+            color: ${GOLD};
           }
           .hm-hotel-caption {
             position: absolute;

@@ -19,11 +19,17 @@ export function SiteHeader() {
 
   return (
     <header className="z-20 w-full border-b border-border bg-background text-foreground">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4">
-        <Link href="/" aria-label="Смарт румс — на главную">
-          <LogoWordmark />
-        </Link>
-        <HeaderNav variant="light" />
+      {/* Горизонтальные отступы — те же, что у навигации внутри hero-карточки
+          на главной (page.tsx: p-2 sm:p-3 md:p-6 lg:p-12 снаружи и
+          px-6 sm:px-8 md:px-[56px] у nav), чтобы логотип и меню стояли на
+          одних и тех же местах на всех страницах и не разъезжались шире. */}
+      <div className="mx-auto max-w-7xl px-2 sm:px-3 md:px-6 lg:px-12">
+        <div className="flex items-center justify-between gap-6 px-6 py-4 sm:px-8 md:px-[56px]">
+          <Link href="/" aria-label="Смарт румс — на главную">
+            <LogoWordmark />
+          </Link>
+          <HeaderNav variant="light" />
+        </div>
       </div>
     </header>
   );

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { HotelMap, ICON_COMPONENTS, MetroGlyph } from "@/components/brand/hotel-map";
-import type { MapPointIcon, MapPointId } from "@/content/city-map";
+import { CATEGORY_LABEL, type MapPointId } from "@/content/city-map";
 import { DEFAULT_PLACE_ID, PLACES } from "@/content/places";
 import { hotel } from "@/content/site";
 
@@ -32,16 +32,6 @@ import { hotel } from "@/content/site";
  * (раскрывает place.shortFact, не всегда видимый текст). Вкладки выбора
  * места — отдельной полосой внизу той же карточки, вровень на всю ширину.
  */
-
-const CATEGORY_LABEL: Record<MapPointIcon, string> = {
-  metro: "Метро",
-  vokzal: "Вокзал",
-  nevsky: "Проспект",
-  bar: "Улица",
-  bridge: "Мост",
-  theater: "Театр",
-  gallery: "Торговый центр",
-};
 
 function ShortFact({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
