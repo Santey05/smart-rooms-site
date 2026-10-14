@@ -4,6 +4,9 @@
 архитектуры и принятых решений — в [`CLAUDE.md`](./CLAUDE.md), это основной
 рабочий документ проекта.
 
+Передача проекта, аккаунты, деплой на Amvera, смена домена и редактирование
+контента — в [`HANDOVER.md`](./HANDOVER.md).
+
 ## Стек
 
 Next.js (App Router) · React · TypeScript · Tailwind CSS v4 · shadcn/ui
@@ -24,7 +27,7 @@ pnpm dev
 
 ```bash
 pnpm lint
-pnpm typecheck
+pnpm exec tsc --noEmit
 pnpm build
 ```
 
