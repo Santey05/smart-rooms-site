@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { BnovoBookingModule } from "@/components/bnovo-booking-module";
+import { BookingModuleSkeleton } from "@/components/booking-module-skeleton";
 
 export const metadata: Metadata = {
   title: "Бронирование",
@@ -29,19 +30,11 @@ export default function BookingPage() {
         </div>
 
         <div className="bg-white p-3 sm:p-6">
-          <Suspense fallback={<BookingModuleFallback />}>
+          <Suspense fallback={<BookingModuleSkeleton />}>
             <BnovoBookingModule />
           </Suspense>
         </div>
       </div>
     </main>
-  );
-}
-
-function BookingModuleFallback() {
-  return (
-    <div className="flex h-64 items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-      Загружаем модуль бронирования…
-    </div>
   );
 }

@@ -2,21 +2,20 @@
 
 import Script from "next/script";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+import { BookingModuleSkeleton } from "@/components/booking-module-skeleton";
+import { Button } from "@/components/ui/button";
+import { hotel, phoneHref } from "@/content/site";
 
 /**
- * Встроенный модуль бронирования Bnovo.
- *
- * См. CLAUDE.md, раздел 6.1 — параметры и их назначение задокументированы
- * там. Модуль сам показывает актуальные типы номеров, цены, доступность
- * и проводит гостя через оплату — сайт этого не делает и не проверяет
- * (раздел 4.1).
- *
- * ВАЖНО: успешная загрузка этого iframe не является подтверждением
- * работоспособности бронирования — см. раздел 12.3 и 18 CLAUDE.md.
- * Обязателен ручной acceptance-тест перед production.
+ * Встраивание Bnovo по CLAUDE.md, раздел 6.1. Цены, доступность, данные
+ * гостя и оплату обрабатывает только Bnovo. Загрузка iframe не подтверждает
+ * работоспособность бронирования — нужен ручной сценарий из раздела 12.3.
  */
-
 const BNOVO_HTML_ID = "bnovo_booking";
+const LOADING_TIMEOUT_MS = 20_000;
+type LoadingState = "loading" | "loaded" | "slow" | "error";
 
 declare global {
   interface Window {
@@ -27,41 +26,115 @@ declare global {
 export function BnovoBookingModule() {
   const params = useSearchParams();
   const uid = process.env.NEXT_PUBLIC_BNOVO_UID;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<LoadingState>("loading");
 
-  if (!uid) {
-    // Явная ошибка конфигурации лучше, чем молчаливо нерабочий модуль.
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
-        Не задана переменная окружения NEXT_PUBLIC_BNOVO_UID. Модуль
-        бронирования Bnovo не может быть инициализирован.
-      </div>
-    );
-  }
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !uid) return;
+
+    const frames = new Set<HTMLIFrameElement>();
+    // load означает загрузку документа iframe, не успешную бронь
+    // и не подтверждение работоспособности содержимого чужого домена.
+    const onFrameLoad = () => setState("loaded");
+    function watchFrames() {
+      container?.querySelectorAll("iframe").forEach((frame) => {
+        if (frames.has(frame)) return;
+        frames.add(frame);
+        if (!frame.title) frame.title = "Онлайн-бронирование Смарт румс";
+        frame.addEventListener("load", onFrameLoad);
+      });
+    }
+
+    const observer = new MutationObserver(watchFrames);
+    observer.observe(container, { childList: true, subtree: true });
+    watchFrames();
+    const timeout = window.setTimeout(() => {
+      setState((current) => (current === "loading" ? "slow" : current));
+    }, LOADING_TIMEOUT_MS);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timeout);
+      frames.forEach((frame) => frame.removeEventListener("load", onFrameLoad));
+    };
+  }, [uid]);
+
+  const needsHelp = state === "error" || state === "slow" || !uid;
 
   return (
     <>
-      <div id={BNOVO_HTML_ID} />
-      <Script
-        src="https://widget.reservationsteps.ru/iframe/library/dist/booking_iframe.js"
-        strategy="afterInteractive"
-        onReady={() => {
-          if (!window.BookingIframe) return;
-
-          new window.BookingIframe({
-            html_id: BNOVO_HTML_ID,
-            uid,
-            lang: "ru",
-            width: "auto",
-            height: "auto",
-            rooms: params.get("room") ?? "", // bnovoRoomTypeId, см. CLAUDE.md 5.2
-            dfrom: params.get("dfrom") ?? "",
-            dto: params.get("dto") ?? "",
-            adults: params.get("adults") ?? "2",
-            children: params.get("children") ?? "", // см. CLAUDE.md 6.4
-            promoCode: params.get("promoCode") ?? "", // см. CLAUDE.md 6.5
-          }).init();
-        }}
-      />
+      {needsHelp && (
+        <div
+          role={state === "error" || !uid ? "alert" : "status"}
+          className="mb-4 grid gap-3 rounded-xl border border-border bg-background p-5 text-sm"
+        >
+          <p className="font-medium">
+            {!uid || state === "error"
+              ? "Не удалось загрузить модуль бронирования."
+              : "Загрузка занимает больше времени, чем обычно."}
+          </p>
+          {needsHelp && (
+            <>
+              <p className="text-muted-foreground">
+                {state === "slow" && uid
+                  ? "Можно подождать ещё немного или обновить страницу. Выбранные даты и гости сохранятся."
+                  : "Попробуйте обновить страницу или свяжитесь с нами, чтобы уточнить варианты размещения."}
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button type="button" variant="dark" onClick={() => window.location.reload()}>
+                  Обновить страницу
+                </Button>
+                {hotel.phone && (
+                  <a href={phoneHref(hotel.phone)} className="underline underline-offset-4">
+                    Позвонить: {hotel.phone}
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      <div className="relative" aria-busy={state === "loading" && Boolean(uid)}>
+        {state === "loading" && uid && <BookingModuleSkeleton />}
+        <div
+          ref={containerRef}
+          id={BNOVO_HTML_ID}
+          className={state === "loading" ? "pointer-events-none absolute inset-x-0 top-0 opacity-0" : undefined}
+          inert={state === "loading"}
+          aria-hidden={state === "loading" ? true : undefined}
+        />
+      </div>
+      {uid && (
+        <Script
+          src="https://widget.reservationsteps.ru/iframe/library/dist/booking_iframe.js"
+          strategy="afterInteractive"
+          onError={() => setState("error")}
+          onReady={() => {
+            if (!window.BookingIframe) {
+              setState("error");
+              return;
+            }
+            try {
+              new window.BookingIframe({
+                html_id: BNOVO_HTML_ID,
+                uid,
+                lang: "ru",
+                width: "auto",
+                height: "auto",
+                rooms: params.get("room") ?? "", // ID типа номера, CLAUDE.md 5.2
+                dfrom: params.get("dfrom") ?? "",
+                dto: params.get("dto") ?? "",
+                adults: params.get("adults") ?? "2",
+                children: params.get("children") ?? "", // отдельно от adults, CLAUDE.md 6.4
+                promoCode: params.get("promoCode") ?? "", // CLAUDE.md 6.5
+              }).init();
+            } catch {
+              setState("error");
+            }
+          }}
+        />
+      )}
     </>
   );
 }
