@@ -1,12 +1,14 @@
 "use client";
 
 import Script from "next/script";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { BookingModuleSkeleton } from "@/components/booking-module-skeleton";
 import { Button } from "@/components/ui/button";
 import { hotel, phoneHref } from "@/content/site";
+import { parseBnovoChildren } from "@/lib/booking";
 
 /**
  * Встраивание Bnovo по CLAUDE.md, раздел 6.1. Цены, доступность, данные
@@ -26,12 +28,14 @@ declare global {
 export function BnovoBookingModule() {
   const params = useSearchParams();
   const uid = process.env.NEXT_PUBLIC_BNOVO_UID;
+  const childAges = parseBnovoChildren(params.get("children"));
+  const validChildren = childAges !== null;
   const containerRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<LoadingState>("loading");
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || !uid) return;
+    if (!container || !uid || !validChildren) return;
 
     const frames = new Set<HTMLIFrameElement>();
     // load означает загрузку документа iframe, не успешную бронь
@@ -58,7 +62,22 @@ export function BnovoBookingModule() {
       window.clearTimeout(timeout);
       frames.forEach((frame) => frame.removeEventListener("load", onFrameLoad));
     };
-  }, [uid]);
+  }, [uid, validChildren]);
+
+  // Старые ссылки содержат количество детей. Возраст из него узнать нельзя.
+  if (!validChildren) {
+    return (
+      <div role="alert" className="grid gap-3 rounded-xl border border-border bg-background p-5 text-sm">
+        <p className="font-medium">Укажите возраст каждого ребёнка</p>
+        <p className="text-muted-foreground">
+          Для поиска с детьми нужен возраст каждого ребёнка от 6 до 17 лет. Вернитесь к форме поиска и выберите возраст.
+        </p>
+        <Button asChild variant="dark" className="w-fit">
+          <Link href="/#hero-card">Выбрать возраст детей</Link>
+        </Button>
+      </div>
+    );
+  }
 
   const needsHelp = state === "error" || state === "slow" || !uid;
 
@@ -126,7 +145,7 @@ export function BnovoBookingModule() {
                 dfrom: params.get("dfrom") ?? "",
                 dto: params.get("dto") ?? "",
                 adults: params.get("adults") ?? "2",
-                children: params.get("children") ?? "", // отдельно от adults, CLAUDE.md 6.4
+                children: JSON.stringify(childAges), // массив возрастов, отдельно от adults — CLAUDE.md 6.4
                 promoCode: params.get("promoCode") ?? "", // CLAUDE.md 6.5
               }).init();
             } catch {

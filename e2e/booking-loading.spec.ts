@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SCRIPT = "https://widget.reservationsteps.ru/iframe/library/dist/booking_iframe.js";
 const FRAME = "https://reservationsteps.ru/__booking_loading_test";
-const BOOKING_URL = "/booking?dfrom=05-11-2026&dto=09-11-2026&adults=3&children=1&room=test-room&promoCode=TEST";
+const BOOKING_URL = "/booking?dfrom=05-11-2026&dto=09-11-2026&adults=3&children=%5B6%2C17%5D&room=test-room&promoCode=TEST";
 
 function widgetScript(delay = 0) {
   return `window.BookingIframe = function(options) {
@@ -53,7 +53,7 @@ test("при сетевом сбое предлагает контакт и по
   await expect(page.locator("main").getByRole("alert")).toBeHidden();
   expect(new URL(page.url()).search).toBe(BOOKING_URL.slice(BOOKING_URL.indexOf("?")));
   const options = await page.evaluate(() => (window as unknown as { __loadingTestOptions: Record<string, string> }).__loadingTestOptions);
-  expect(options).toMatchObject({ dfrom: "05-11-2026", dto: "09-11-2026", adults: "3", children: "1", rooms: "test-room", promoCode: "TEST" });
+  expect(options).toMatchObject({ dfrom: "05-11-2026", dto: "09-11-2026", adults: "3", children: "[6,17]", rooms: "test-room", promoCode: "TEST" });
 });
 
 for (const [name, body] of [

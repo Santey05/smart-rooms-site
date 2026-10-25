@@ -14,8 +14,8 @@ export interface BookingSearchValues {
   checkOut: Date;
   /** Количество взрослых гостей */
   adults: number;
-  /** Количество детей — см. CLAUDE.md 6.4: не суммировать с adults */
-  children?: number;
+  /** Возраст каждого ребёнка — JSON-массив в Bnovo, отдельно от adults (CLAUDE.md 6.4). */
+  children?: number[];
   /** ID типа номера в Bnovo (bnovoRoomTypeId) — опционально, см. CLAUDE.md 5.2 */
   room?: string;
   /** Промокод — см. CLAUDE.md 6.5, в MVP не используется */
@@ -42,8 +42,8 @@ export function buildBookingSearchParams(values: BookingSearchValues): URLSearch
     adults: String(values.adults),
   });
 
-  if (values.children && values.children > 0) {
-    params.set("children", String(values.children));
+  if (values.children?.length) {
+    params.set("children", JSON.stringify(values.children));
   }
   if (values.room) {
     params.set("room", values.room);
@@ -57,4 +57,23 @@ export function buildBookingSearchParams(values: BookingSearchValues): URLSearch
 
 export function buildBookingHref(values: BookingSearchValues): string {
   return `/booking?${buildBookingSearchParams(values).toString()}`;
+}
+
+/** Разрешённый пользователем диапазон возраста в форме поиска. */
+export const MIN_CHILD_AGE = 6;
+export const MAX_CHILD_AGE = 17;
+
+/** Только формат параметра поиска; не проверяет вместимость или стоимость. */
+export function parseBnovoChildren(value: string | null): number[] | null {
+  if (!value) return [];
+  try {
+    const ages: unknown = JSON.parse(value);
+    if (!Array.isArray(ages) || !ages.every(
+      (age: unknown) => typeof age === "number" && Number.isInteger(age)
+        && age >= MIN_CHILD_AGE && age <= MAX_CHILD_AGE,
+    )) return null;
+    return ages as number[];
+  } catch {
+    return null;
+  }
 }

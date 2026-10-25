@@ -9,7 +9,7 @@ import type { DateRange } from "react-day-picker";
 import { DateRangeCalendar } from "@/components/date-range-calendar";
 import { Button } from "@/components/ui/button";
 import { hotel } from "@/content/site";
-import { buildBookingHref } from "@/lib/booking";
+import { buildBookingHref, MIN_CHILD_AGE, MAX_CHILD_AGE } from "@/lib/booking";
 import { cn } from "@/lib/utils";
 
 /**
@@ -80,16 +80,16 @@ function guestsLabel(adults: number, children: number): string {
 // (раздел 6.5). Растёт от правого края: карточка обычно прижата к правому
 // краю hero, попап, растущий вправо, уехал бы за экран.
 const panelClass =
-  "absolute right-0 top-full z-30 mt-3 max-w-[calc(100vw-2rem)] rounded-2xl border border-glass-border bg-neva/90 p-4 text-white shadow-2xl backdrop-blur-xl";
+  "absolute right-0 top-full z-30 mt-3 scroll-mb-20 lg:scroll-mb-4 max-w-[calc(100vw-2rem)] rounded-2xl border border-glass-border bg-neva p-4 text-white shadow-2xl";
 
 function useIsWide(): boolean {
   return useSyncExternalStore(
     (onChange) => {
-      const mq = window.matchMedia("(min-width: 640px)");
+      const mq = window.matchMedia("(min-width: 768px)");
       mq.addEventListener("change", onChange);
       return () => mq.removeEventListener("change", onChange);
     },
-    () => window.matchMedia("(min-width: 640px)").matches,
+    () => window.matchMedia("(min-width: 768px)").matches,
     () => true,
   );
 }
@@ -156,7 +156,7 @@ function DateField({
   value: Date | undefined;
   open: boolean;
   controls: string;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <button
@@ -164,13 +164,14 @@ function DateField({
       aria-haspopup="dialog"
       aria-expanded={open}
       aria-controls={controls}
-      aria-label={`${label}: ${value ? value.toLocaleDateString("ru-RU", { day: "numeric", month: "long", weekday: "long" }) : "не выбрано"}`}
+      aria-label={`${label}: ${value ? value.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric", weekday: "long" }) : "не выбрано"}`}
       onClick={onClick}
       className={cn(dateFieldClass, open && "bg-[rgba(16,24,32,0.7)]")}
     >
       <CalendarDays className="size-5 shrink-0 text-granite" aria-hidden />
-      <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-white">
-        {formatDateShort(value)}
+      <span className="min-w-0 flex-1 text-white">
+        <span className="block text-[11px] leading-tight text-granite">{label}</span>
+        <span className="block truncate text-[15px] font-medium">{formatDateShort(value)}</span>
       </span>
       <ChevronDown
         className={cn("size-4 shrink-0 text-granite transition-transform", open && "rotate-180")}
@@ -186,6 +187,8 @@ export function BookingSearchForm() {
   const router = useRouter();
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const wide = useIsWide();
 
   // today фиксируем один раз на монтирование, чтобы календарь не «прыгал».
@@ -199,8 +202,11 @@ export function BookingSearchForm() {
   // обновлением состояния, а не частью SSR-рендера.
   const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
+  const [childAges, setChildAges] = useState<Array<number | null>>([]);
+  const children = childAges.length;
+  const hasChildAges = childAges.every((age) => age !== null);
   const [open, setOpen] = useState<OpenPanel>(null);
+  const [dateField, setDateField] = useState<"checkIn" | "checkOut">("checkIn");
 
   // Значение зависит от Date и должно появиться уже после гидратации, не
   // участвуя в сверке сервер/клиент (см. комментарий у range выше) — «лишний
@@ -210,25 +216,67 @@ export function BookingSearchForm() {
     setRange({ from: addDays(startOfToday(), 1), to: addDays(startOfToday(), 2) });
   }, []);
 
-  // Закрываем панели по клику вне формы и по Escape.
+  // Немодальные панели: фокус внутри при открытии, свободный выход по Tab.
   useEffect(() => {
     if (!open) return;
-    function onPointerDown(event: MouseEvent) {
+    const panel = panelRef.current;
+    const initialFocus = panel?.querySelector<HTMLButtonElement>(
+      '[data-selected="true"] button:not([disabled]):not([aria-disabled="true"])',
+    ) ?? panel?.querySelector<HTMLButtonElement>('[data-day] button:not([disabled]):not([aria-disabled="true"])')
+      ?? panel?.querySelector<HTMLButtonElement>('button:not([disabled]):not([aria-disabled="true"])');
+    initialFocus?.focus({ preventScroll: true });
+    panel?.scrollIntoView({ block: "nearest", behavior: "instant" });
+
+    function onPointerDown(event: PointerEvent) {
       if (!formRef.current?.contains(event.target as Node)) setOpen(null);
     }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(null);
+    function onFocusIn(event: FocusEvent) {
+      if (!panel?.contains(event.target as Node) && event.target !== triggerRef.current) {
+        setOpen(null);
+      }
     }
-    document.addEventListener("mousedown", onPointerDown);
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(null);
+        triggerRef.current?.focus({ preventScroll: true });
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("focusin", onFocusIn);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, dateField]);
 
-  function toggle(panel: Exclude<OpenPanel, null>) {
-    setOpen((current) => (current === panel ? null : panel));
+  // Список возрастов может увеличить высоту уже открытой панели.
+  useEffect(() => {
+    if (open === "guests") panelRef.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+  }, [open, children]);
+
+  function setChildren(count: number) {
+    setChildAges((current) => count <= current.length
+      ? current.slice(0, count)
+      : [...current, ...Array<number | null>(count - current.length).fill(null)]);
+  }
+
+  function closePanel() {
+    setOpen(null);
+    triggerRef.current?.focus({ preventScroll: true });
+  }
+
+  function toggleDates(field: "checkIn" | "checkOut", trigger: HTMLButtonElement) {
+    triggerRef.current = trigger;
+    setDateField(field);
+    setOpen(open === "dates" && dateField === field ? null : "dates");
+  }
+
+  function toggleGuests(trigger: HTMLButtonElement) {
+    triggerRef.current = trigger;
+    setOpen((current) => (current === "guests" ? null : "guests"));
   }
 
   const hasDates = Boolean(range?.from && range.to);
@@ -242,12 +290,17 @@ export function BookingSearchForm() {
       return;
     }
 
+    if (!childAges.every((age): age is number => age !== null)) {
+      setOpen("guests");
+      return;
+    }
+
     router.push(
       buildBookingHref({
         checkIn: range.from,
         checkOut: range.to,
         adults,
-        children: children > 0 ? children : undefined,
+        children: childAges,
       }),
     );
   }
@@ -276,16 +329,16 @@ export function BookingSearchForm() {
         <DateField
           label="Заезд"
           value={range?.from}
-          open={open === "dates"}
+          open={open === "dates" && dateField === "checkIn"}
           controls={datesPanelId}
-          onClick={() => toggle("dates")}
+          onClick={(event) => toggleDates("checkIn", event.currentTarget)}
         />
         <DateField
           label="Выезд"
           value={range?.to}
-          open={open === "dates"}
+          open={open === "dates" && dateField === "checkOut"}
           controls={datesPanelId}
-          onClick={() => toggle("dates")}
+          onClick={(event) => toggleDates("checkOut", event.currentTarget)}
         />
       </div>
 
@@ -295,10 +348,10 @@ export function BookingSearchForm() {
           aria-haspopup="dialog"
           aria-expanded={open === "guests"}
           aria-controls={guestsPanelId}
-          aria-label={`Гости: ${guestsLabel(adults, children)}`}
-          onClick={() => toggle("guests")}
+          aria-label={`Гости: ${guestsLabel(adults, children)}${hasChildAges ? "" : ", укажите возраст детей"}`}
+          onClick={(event) => toggleGuests(event.currentTarget)}
           className={cn(
-            "flex w-full items-center justify-between gap-3 rounded-xl bg-field-bg px-4 py-3 text-left transition-colors outline-none hover:bg-[rgba(16,24,32,0.7)]",
+            "flex w-full items-center justify-between gap-3 rounded-xl bg-field-bg px-4 py-3 text-left transition-colors outline-none hover:bg-[rgba(16,24,32,0.7)] focus-visible:ring-2 focus-visible:ring-white/50",
             open === "guests" && "bg-[rgba(16,24,32,0.7)]",
           )}
         >
@@ -306,6 +359,7 @@ export function BookingSearchForm() {
             <User className="size-4 shrink-0 text-granite" aria-hidden />
             <span className="text-[15px] font-medium text-white">
               {guestsLabel(adults, children)}
+              {!hasChildAges && <span className="block text-xs text-lantern">Укажите возраст детей</span>}
             </span>
           </span>
           <ChevronDown
@@ -319,19 +373,47 @@ export function BookingSearchForm() {
 
         {open === "guests" && (
           <div
+            ref={panelRef}
             id={guestsPanelId}
             role="dialog"
             aria-label="Выбор гостей"
-            className={cn(panelClass, "grid w-72 gap-4")}
+            className={cn(panelClass, "grid max-h-[min(32rem,calc(100dvh-7rem))] w-72 gap-4 overflow-y-auto")}
           >
             <Stepper label="Взрослые" value={adults} min={1} max={10} onChange={setAdults} />
             <Stepper label="Дети" value={children} min={0} max={10} onChange={setChildren} />
+            {children > 0 && (
+              <div className="grid gap-3 border-t border-white/20 pt-3">
+                <p className="text-xs text-granite">Укажите возраст каждого ребёнка: от 6 до 17 лет.</p>
+                {childAges.map((age, index) => (
+                  <label key={index} className="grid gap-1.5 text-sm">
+                    Возраст ребёнка {index + 1}
+                    <select
+                      required
+                      value={age ?? ""}
+                      onChange={(event) => {
+                        const nextAge = Number(event.currentTarget.value);
+                        setChildAges((current) => current.map((value, i) => i === index ? nextAge : value));
+                      }}
+                      className="h-11 w-full rounded-lg border border-white/20 bg-neva px-3 text-white outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                    >
+                      <option value="" disabled>Выберите возраст</option>
+                      {Array.from({ length: MAX_CHILD_AGE - MIN_CHILD_AGE + 1 }, (_, i) => MIN_CHILD_AGE + i).map((years) => (
+                        <option key={years} value={years}>
+                          {years} {plural(years, "год", "года", "лет")}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            )}
             <Button
               type="button"
               variant="default"
               size="sm"
               className="rounded-lg"
-              onClick={() => setOpen(null)}
+              onClick={closePanel}
+              disabled={!hasChildAges}
             >
               Готово
             </Button>
@@ -342,7 +424,7 @@ export function BookingSearchForm() {
       <div className="flex flex-col gap-2">
         <Button
           type="submit"
-          disabled={!hasDates}
+          disabled={!hasDates || !hasChildAges}
           className="h-12 w-full rounded-[10px] text-base font-medium"
         >
           Забронировать
@@ -358,12 +440,19 @@ export function BookingSearchForm() {
 
       {open === "dates" && (
         <div
+          ref={panelRef}
           id={datesPanelId}
           role="dialog"
           aria-label="Выбор дат"
           className={cn(panelClass, "grid gap-4")}
         >
+          <p className="text-sm font-medium" aria-live="polite">
+            {dateField === "checkIn" ? "Выберите дату заезда" : "Выберите дату выезда"}
+          </p>
           <DateRangeCalendar
+            key={dateField}
+            field={dateField}
+            onCheckInSelected={() => setDateField("checkOut")}
             range={range}
             onRangeChange={setRange}
             today={today}
@@ -375,7 +464,7 @@ export function BookingSearchForm() {
             size="sm"
             className="rounded-lg"
             disabled={!hasDates}
-            onClick={() => setOpen(null)}
+            onClick={closePanel}
           >
             Готово
           </Button>

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { buildBookingSearchParams, formatBnovoDate } from "../src/lib/booking";
+import { buildBookingSearchParams, formatBnovoDate, parseBnovoChildren } from "../src/lib/booking";
 
 /**
  * Юнит-проверка формирования query-параметров /booking (CLAUDE.md,
@@ -27,19 +27,19 @@ test.describe("buildBookingSearchParams", () => {
       checkIn: new Date(2026, 9, 5),
       checkOut: new Date(2026, 9, 9),
       adults: 2,
-      children: 1,
+      children: [6, 17],
     });
 
     expect(params.get("adults")).toBe("2");
-    expect(params.get("children")).toBe("1");
+    expect(params.get("children")).toBe("[6,17]");
   });
 
-  test("children=0 не попадает в параметры", () => {
+  test("пустой список детей не попадает в параметры", () => {
     const params = buildBookingSearchParams({
       checkIn: new Date(2026, 9, 5),
       checkOut: new Date(2026, 9, 9),
       adults: 2,
-      children: 0,
+      children: [],
     });
 
     expect(params.has("children")).toBe(false);
@@ -60,5 +60,20 @@ test.describe("buildBookingSearchParams", () => {
 
   test("formatBnovoDate дополняет день/месяц нулём", () => {
     expect(formatBnovoDate(new Date(2026, 0, 1))).toBe("01-01-2026");
+  });
+});
+
+
+test.describe("формат возрастов для Bnovo", () => {
+  test("принимает возраста 6 и 17 лет и пустой список", () => {
+    expect(parseBnovoChildren("[6,17]")).toEqual([6, 17]);
+    expect(parseBnovoChildren("[]")).toEqual([]);
+    expect(parseBnovoChildren(null)).toEqual([]);
+  });
+
+  test("отклоняет количество вместо возрастов и некорректный массив", () => {
+    for (const value of ["1", "2", "null", "{}", "not-json", '["6"]', "[null]", "[5]", "[18]", "[6.5]"]) {
+      expect(parseBnovoChildren(value)).toBeNull();
+    }
   });
 });

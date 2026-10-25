@@ -15,21 +15,25 @@ export function DateRangeCalendar({
   onRangeChange,
   today,
   numberOfMonths,
+  field,
+  onCheckInSelected,
 }: {
   range: DateRange | undefined;
   onRangeChange: (range: DateRange | undefined) => void;
   today: Date;
   numberOfMonths: number;
+  field: "checkIn" | "checkOut";
+  onCheckInSelected: () => void;
 }) {
   function handleDayClick(day: Date) {
-    // Нет начала или диапазон уже выбран — начинаем выбор заново с этой даты.
-    // Выезд должен быть позже заезда, поэтому клик по той же/более ранней дате
-    // тоже начинает новый выбор.
-    if (!range?.from || range.to || day <= range.from) {
-      onRangeChange({ from: day, to: undefined });
+    if (field === "checkIn" || !range?.from) {
+      // Уже выбранный выезд сохраняется, если он позже нового заезда.
+      // Здесь только порядок дат; наличие и цены проверяет Bnovo.
+      onRangeChange({ from: day, to: range?.to && range.to > day ? range.to : undefined });
+      onCheckInSelected();
       return;
     }
-    onRangeChange({ from: range.from, to: day });
+    if (day > range.from) onRangeChange({ from: range.from, to: day });
   }
 
   return (
@@ -38,9 +42,15 @@ export function DateRangeCalendar({
       locale={ru}
       weekStartsOn={1}
       numberOfMonths={numberOfMonths}
-      defaultMonth={range?.from ?? today}
+      defaultMonth={field === "checkOut" && range?.from
+        ? range.to ?? new Date(range.from.getFullYear(), range.from.getMonth(), range.from.getDate() + 1)
+        : range?.from ?? today}
       startMonth={today}
-      disabled={{ before: today }}
+      disabled={{
+        before: field === "checkOut" && range?.from
+          ? new Date(range.from.getFullYear(), range.from.getMonth(), range.from.getDate() + 1)
+          : today,
+      }}
       selected={range}
       // Заезд/выезд — цифра тёплого цвета и тонкое кольцо-обводка; дни между
       // ними — только цвет цифры, без кольца и подложки (пока выбран только
@@ -70,10 +80,10 @@ export function DateRangeCalendar({
         button_previous: navButton,
         button_next: navButton,
         month_grid: "border-collapse",
-        weekday: "size-10 text-xs font-normal text-granite",
+        weekday: "size-9 text-xs font-normal text-granite sm:size-10",
         day: "p-0 text-center",
         day_button:
-          "size-10 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50",
+          "size-9 cursor-pointer rounded-full text-sm font-medium tabular-nums outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/50 sm:size-10",
         // Дни соседних месяцев не показываем, вместе с подложкой диапазона.
         outside: "invisible",
         hidden: "invisible",

@@ -20,7 +20,11 @@ function addDays(date: Date, days: number): Date {
 }
 
 function isoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  // data-day календаря — локальная дата, а не день в UTC.
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return [year, month, day].join("-");
 }
 
 test("поиск на главной передаёт даты и гостей в /booking и в модуль Bnovo", async ({ page }) => {
@@ -67,6 +71,7 @@ test("поиск на главной передаёт даты и гостей �
   await page.getByRole("button", { name: "Увеличить: Взрослые" }).click();
   await page.getByRole("button", { name: "Увеличить: Взрослые" }).click();
   await page.getByRole("button", { name: "Увеличить: Дети" }).click();
+  await page.getByRole("combobox", { name: "Возраст ребёнка 1" }).selectOption("6");
   await page.getByRole("dialog", { name: "Выбор гостей" }).getByRole("button", { name: "Готово" }).click();
 
   await page.getByRole("button", { name: "Забронировать" }).click();
@@ -79,7 +84,7 @@ test("поиск на главной передаёт даты и гостей �
   expect(url.searchParams.get("dfrom")).toBe(expectedDfrom);
   expect(url.searchParams.get("dto")).toBe(expectedDto);
   expect(url.searchParams.get("adults")).toBe("3");
-  expect(url.searchParams.get("children")).toBe("1");
+  expect(url.searchParams.get("children")).toBe("[6]");
 
   // 2. Те же параметры реально дошли до инициализации модуля Bnovo.
   await expect
@@ -94,7 +99,7 @@ test("поиск на главной передаёт даты и гостей �
       dfrom: expectedDfrom,
       dto: expectedDto,
       adults: "3",
-      children: "1",
+      children: "[6]",
     });
 
   // 3. Модуль не просто "инициализирован" — его iframe реально виден
@@ -102,4 +107,9 @@ test("поиск на главной передаёт даты и гостей �
   // работоспособность бронирования, но то, что он хотя бы появился на
   // странице, обязана показать эта проверка).
   await expect(page.locator("#bnovo_booking iframe").first()).toBeVisible({ timeout: 20_000 });
+  // Не только передача параметров: Bnovo должен принять 3 взрослых и ребёнка.
+  // Только чтение первого шага, без бронирования и кликов внутри чужого iframe.
+  await expect(
+    page.frameLocator("#bnovo_booking iframe").getByText("4 гостя", { exact: true }),
+  ).toBeVisible({ timeout: 20_000 });
 });

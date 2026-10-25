@@ -89,7 +89,7 @@ export default function HomePage() {
           max-w-7xl — та же ширина, что и у остальных секций страницы, иначе
           на очень широких мониторах карточка растягивается непропорционально. */}
       <div className="mx-auto max-w-7xl p-2 sm:p-3 md:p-6 lg:p-12">
-        <section className="relative isolate flex flex-col overflow-visible rounded-[24px] bg-neva text-white shadow-[0_40px_100px_-30px_rgba(14,20,28,0.6)] lg:min-h-[min(900px,calc(100vh-6rem))] lg:rounded-[32px]">
+        <section className="relative isolate z-10 flex flex-col overflow-visible rounded-[24px] bg-neva text-white shadow-[0_40px_100px_-30px_rgba(14,20,28,0.6)] lg:min-h-[min(900px,calc(100vh-6rem))] lg:rounded-[32px]">
           {/* Фото/иллюстрация — обрезана по скруглению; попапы карточки
               бронирования могут выходить за этот слой. */}
           <div className="absolute inset-0 overflow-hidden rounded-[24px] lg:rounded-[32px]">
