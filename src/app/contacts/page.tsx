@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import Link from "next/link";
 
 import { ContactList } from "@/components/contact-list";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "Контакты",
-  description: "Адрес, телефон и как заселиться в мини-отель «Смарт румс».",
-  alternates: { canonical: "/contacts" },
-};
+export const metadata: Metadata = pageMetadata("Контакты", "Адрес, телефон и как заселиться в мини-отель «Смарт румс».", "/contacts");
 
 export default function ContactsPage() {
   return (

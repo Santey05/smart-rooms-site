@@ -1,7 +1,36 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
+// Источники взяты из сетевой проверки сайта 26.10.2026.
+// Report-Only собирает диагностику в консоли браузера, не блокируя Bnovo
+// и его платёжные переходы. Подресурсы чужого iframe регулирует сам Bnovo.
+const sentryOrigin = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? new URL(process.env.NEXT_PUBLIC_SENTRY_DSN).origin : "";
+const diagnosticCsp = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline' https://api-maps.yandex.ru https://yastatic.net https://widget.reservationsteps.ru",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://yastatic.net https://core-renderer-tiles.maps.yandex.net https://yandex.ru",
+  "font-src 'self'",
+  ("connect-src 'self' " + sentryOrigin).trim(),
+  "frame-src https://reservationsteps.ru https://widget.reservationsteps.ru",
+].join("; ");
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ...(process.env.NODE_ENV === "production"
+          ? [{ key: "Content-Security-Policy-Report-Only", value: diagnosticCsp }]
+          : []),
+      ],
+    }];
+  },
   // Самодостаточная сборка для Docker-деплоя (Amvera, см. Dockerfile) —
   // в .next/standalone попадают только реально нужные файлы из
   // node_modules, не весь node_modules целиком.

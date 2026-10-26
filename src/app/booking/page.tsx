@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { Suspense } from "react";
 
 import { BnovoBookingModule } from "@/components/bnovo-booking-module";
 import { BookingModuleSkeleton } from "@/components/booking-module-skeleton";
 
 export const metadata: Metadata = {
-  title: "Бронирование",
-  description: "Выберите номер и даты — бронирование и оплата онлайн.",
+  ...pageMetadata("Бронирование", "Выберите номер и даты — бронирование и оплата онлайн.", "/booking"),
   robots: { index: false, follow: false },
-  alternates: { canonical: "/booking" },
 };
 
 // useSearchParams в BnovoBookingModule требует Suspense-границы для

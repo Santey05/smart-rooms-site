@@ -209,12 +209,27 @@ interface HotelMapProps {
 
 export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
+  const regionRef = useRef<HTMLDivElement>(null);
+  const [loadMap, setLoadMap] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
   const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
   const initialActiveId = useRef(activeId);
   const latestActiveId = useRef(activeId);
   const mapRef = useRef<YMapsMap | null>(null);
   const onSelectRef = useRef(onSelect);
+
+  useEffect(() => {
+    const region = regionRef.current;
+    if (!region) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setLoadMap(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: "300px" });
+    observer.observe(region);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -326,12 +341,12 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   }, [scriptReady]);
 
   useEffect(() => {
-    if (!apiKey || !hotel.coords) return;
+    if (!loadMap || !apiKey || !hotel.coords) return;
     const timer = window.setTimeout(() => {
       setMapState((current) => current === "loading" ? "error" : current);
     }, 20_000);
     return () => window.clearTimeout(timer);
-  }, [apiKey]);
+  }, [apiKey, loadMap]);
 
   useEffect(() => {
     if (mapState !== "ready") return;
@@ -356,7 +371,7 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   const unavailable = !configured || mapState === "error";
 
   return (
-    <div role="region" aria-label="Карта отеля и ближайших мест" className="relative h-[420px] w-full border-t border-white/10 sm:h-[520px] lg:h-[680px]">
+    <div ref={regionRef} role="region" aria-label="Карта отеля и ближайших мест" className="relative h-[420px] w-full border-t border-white/10 sm:h-[520px] lg:h-[680px]">
       {unavailable ? (
         <div role="status" className="absolute inset-0 z-10 flex flex-col items-start justify-center gap-4 bg-neva p-6 sm:p-10">
           <p className="text-lg font-semibold">Не удалось загрузить карту</p>
@@ -372,7 +387,7 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
           Загружаем карту…
         </div>
       ) : null}
-      {configured && <Script
+      {configured && loadMap && <Script
         src={`https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`}
         strategy="afterInteractive"
         onReady={() => {

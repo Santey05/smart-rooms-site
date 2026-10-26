@@ -430,9 +430,9 @@ export function BookingSearchForm() {
           Забронировать
         </Button>
         <p className="text-[11px] leading-snug text-granite">
-          Нажимая «Забронировать», вы соглашаетесь с{" "}
+          Подробнее об обработке данных — в{" "}
           <Link href="/privacy" className="underline underline-offset-2 hover:text-white">
-            политикой обработки персональных данных
+            политике конфиденциальности
           </Link>
           .
         </p>

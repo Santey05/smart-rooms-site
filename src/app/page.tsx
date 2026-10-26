@@ -12,13 +12,9 @@ import { MobileBookingBar } from "@/components/mobile-booking-bar";
 import { Button } from "@/components/ui/button";
 import { hotel } from "@/content/site";
 import { SITE_URL } from "@/lib/site-url";
+import { pageMetadata, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Смарт румс — мини-отель на Марата, 30, Санкт-Петербург",
-  description:
-    "Мини-отель в доме 1860 года на улице Марата. Пять минут пешком до метро «Владимирская».",
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = pageMetadata(SITE_TITLE, SITE_DESCRIPTION, "/");
 
 /**
  * Структурированные данные Hotel/schema.org — только на главной (CLAUDE.md,
@@ -51,6 +47,7 @@ function buildHotelJsonLd() {
       },
     }),
     ...(hotel.phone && { telephone: hotel.phone }),
+    ...(hotel.email && { email: hotel.email }),
   };
 }
 

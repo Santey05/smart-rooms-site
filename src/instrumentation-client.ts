@@ -17,3 +17,6 @@ if (dsn) {
     tracesSampleRate: 0.2,
   });
 }
+
+// Передаём Sentry переходы между страницами App Router.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

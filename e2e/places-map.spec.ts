@@ -59,6 +59,7 @@ async function expectCenteredOnRoute(page: Page) {
 test("все девять мест показывают свою карточку, без подмены фотографии для Рубинштейна", async ({ page }) => {
   await mockMap(page);
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   const tabs = pointTabs(page).getByRole("button");
   await expect(tabs).toHaveCount(9);
   await pointTabs(page).getByRole("button", { name: "Улица Рубинштейна", exact: true }).click();
@@ -80,6 +81,7 @@ test("все девять мест показывают свою карточк�
 test("клик и клавиатура на маркерах меняют карточку и выделение", async ({ page }) => {
   await mockMap(page);
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   await expect(marker(page, "Невский проспект")).toHaveAttribute("aria-pressed", "true");
   await marker(page, "Улица Рубинштейна").click();
   await expect(explorer(page).getByRole("heading", { level: 3 })).toHaveText("Улица Рубинштейна");
@@ -98,6 +100,7 @@ for (const mode of ["ready-pending", "bounds-pending"] as const) {
   test(`сохраняет выбор во время загрузки карты: ${mode}`, async ({ page }) => {
     await mockMap(page, mode);
     await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
     const callback = mode === "ready-pending" ? "__finishMapReady" : "__finishMapBounds";
     await page.waitForFunction((key) => typeof (window as unknown as Record<string, unknown>)[key] === "function", callback);
     await pointTabs(page).getByRole("button", { name: "Улица Рубинштейна", exact: true }).click();
@@ -111,6 +114,7 @@ for (const mode of ["ready-pending", "bounds-pending"] as const) {
 test("при сетевом сбое карты остаются карточки и правильный внешний маршрут", async ({ page }) => {
   await page.route(MAP_SCRIPT, (route) => route.abort());
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   await expect(map(page).getByText("Не удалось загрузить карту")).toBeVisible();
   await pointTabs(page).getByRole("button", { name: "Галерея", exact: true }).click();
   await expect(explorer(page).getByRole("heading", { level: 3 })).toHaveText("Галерея");
@@ -124,6 +128,7 @@ for (const mode of ["constructor-error", "bounds-error", "ready-error"] as const
     page.on("pageerror", (error) => errors.push(error.message));
     await mockMap(page, mode);
     await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
     await expect(map(page).getByText("Не удалось загрузить карту")).toBeVisible();
     await expect(map(page).getByRole("link", { name: "Открыть Яндекс.Карты" })).toBeVisible();
     expect(errors).toEqual([]);
@@ -134,6 +139,7 @@ test("после долгого ожидания карта может догр�
   await page.clock.install();
   await mockMap(page, "ready-pending");
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   await page.waitForFunction(() => typeof (window as unknown as Record<string, unknown>).__finishMapReady === "function");
   await page.clock.fastForward(20_000);
   await expect(map(page).getByText("Не удалось загрузить карту")).toBeVisible();
@@ -147,6 +153,7 @@ test("после долгого ожидания карта может догр�
 test("после ухода со страницы отложенная загрузка не создаёт карту", async ({ page }) => {
   await mockMap(page, "ready-pending");
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   await page.waitForFunction(() => typeof (window as unknown as Record<string, unknown>).__finishMapReady === "function");
   await page.getByRole("navigation", { name: "Основная навигация" }).getByRole("link", { name: "Контакты", exact: true }).click();
   await expect(page).toHaveURL(/\/contacts$/);
@@ -160,9 +167,26 @@ test("карточки всех мест помещаются на узком э
   await page.route(MAP_SCRIPT, (route) => route.abort());
   await page.setViewportSize({ width: 320, height: 900 });
   await page.goto("/");
+  await map(page).scrollIntoViewIfNeeded();
   for (const name of await pointTabs(page).getByRole("button").allTextContents()) {
     await pointTabs(page).getByRole("button", { name, exact: true }).click();
     await expect(explorer(page).getByRole("heading", { level: 3 })).toHaveText(name);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
+});
+
+test("API карты загружается только при приближении к блоку", async ({ page }) => {
+  let requests = 0;
+  await page.route(MAP_SCRIPT, (route) => {
+    requests++;
+    return route.fulfill({ contentType: "application/javascript", body: mapScript() });
+  });
+  await page.goto("/");
+  // Гидратация завершена, но карта далеко за первым экраном.
+  await page.waitForFunction(() => typeof window.__hotelMapSelect === "function");
+  await expect(page.locator('script[src*="api-maps.yandex.ru"]')).toHaveCount(0);
+  expect(requests).toBe(0);
+  await map(page).scrollIntoViewIfNeeded();
+  await expect(marker(page, "Невский проспект")).toBeVisible();
+  expect(requests).toBe(1);
 });
