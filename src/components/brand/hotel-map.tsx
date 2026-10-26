@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   CATEGORY_LABEL,
   CITY_MAP_POINTS,
+  routeHref,
   type MapPoint,
   type MapPointIcon,
   type MapPointId,
@@ -151,7 +152,8 @@ function pointPinHtml(point: MapPoint): string {
       style="width:40px;height:40px;"
       role="button"
       tabindex="0"
-      aria-label="${CATEGORY_LABEL[point.icon]} ${point.name} — ${point.minutes} минут пешком"
+      aria-pressed="false"
+      aria-label="Выбрать место: ${point.name} — ${point.minutes} минут пешком"
     >
       ${iconMarkup}
       <div class="hm-pin__label" aria-hidden="true">
@@ -180,13 +182,13 @@ interface YMapsPlacemark {
 
 interface YMapsMap {
   geoObjects: { add: (obj: unknown) => void };
-  setBounds: (bounds: [[number, number], [number, number]], options?: Record<string, unknown>) => void;
+  setBounds: (bounds: [[number, number], [number, number]], options?: Record<string, unknown>) => PromiseLike<unknown> | void;
   setCenter: (coords: [number, number], zoom?: number, options?: Record<string, unknown>) => void;
   destroy: () => void;
 }
 
 interface YMapsNamespace {
-  ready: (callback: () => void) => void;
+  ready: (callback: () => void, onError?: () => void) => void;
   Map: new (element: string, state: Record<string, unknown>) => YMapsMap;
   Placemark: YMapsPlacemark;
   templateLayoutFactory: { createClass: (template: string) => unknown };
@@ -208,6 +210,9 @@ interface HotelMapProps {
 export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
   const [scriptReady, setScriptReady] = useState(false);
+  const [mapState, setMapState] = useState<"loading" | "ready" | "error">("loading");
+  const initialActiveId = useRef(activeId);
+  const latestActiveId = useRef(activeId);
   const mapRef = useRef<YMapsMap | null>(null);
   const onSelectRef = useRef(onSelect);
 
@@ -216,7 +221,10 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   }, [onSelect]);
 
   useEffect(() => {
-    window.__hotelMapSelect = (id: string) => onSelectRef.current(id as MapPointId);
+    window.__hotelMapSelect = (id: string) => {
+      const point = CITY_MAP_POINTS.find((item) => item.id === id);
+      if (point) onSelectRef.current(point.id);
+    };
     return () => {
       delete window.__hotelMapSelect;
     };
@@ -226,10 +234,11 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
   // плавно переносим центр карты, без этого меняется только активная
   // карточка/маркер, а карта остаётся на месте.
   useEffect(() => {
+    latestActiveId.current = activeId;
     if (!activeId) return;
     const point = CITY_MAP_POINTS.find((p) => p.id === activeId);
     if (!point) return;
-    mapRef.current?.setCenter([point.coords.lat, point.coords.lon], 16, { duration: 300 });
+    mapRef.current?.setCenter([point.coords.lat, point.coords.lon], 16, { duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 300 });
   }, [activeId]);
 
   useEffect(() => {
@@ -238,83 +247,140 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
     const coords = hotel.coords;
     if (!ymaps || !coords) return;
 
+    let disposed = false;
+    function fail() {
+      if (disposed) return;
+      mapRef.current?.destroy();
+      mapRef.current = null;
+      setMapState("error");
+    }
+
     ymaps.ready(() => {
-      if (mapRef.current) return; // защита от повторной инициализации (Fast Refresh)
+      if (disposed || mapRef.current) return; // защита от повторной инициализации (Fast Refresh)
 
-      const map = new ymaps.Map(MAP_ELEMENT_ID, {
-        center: [coords.lat, coords.lon],
-        zoom: 14,
-        controls: ["zoomControl"],
-        // Масштаб меняется только кнопками +/− (zoomControl выше): колесо
-        // мыши, двойной клик, правая кнопка и pinch отключены — иначе карта
-        // перехватывает прокрутку страницы. Оставлено только перетаскивание.
-        behaviors: ["drag"],
-      });
-      mapRef.current = map;
+      try {
+        const map = new ymaps.Map(MAP_ELEMENT_ID, {
+          center: [coords.lat, coords.lon],
+          zoom: 14,
+          controls: ["zoomControl"],
+          // Масштаб меняется только кнопками +/− (zoomControl выше): колесо
+          // мыши, двойной клик, правая кнопка и pinch отключены — иначе карта
+          // перехватывает прокрутку страницы. Оставлено только перетаскивание.
+          behaviors: ["drag"],
+        });
+        mapRef.current = map;
 
-      map.geoObjects.add(
-        new ymaps.Placemark([coords.lat, coords.lon], {}, {
-          iconLayout: ymaps.templateLayoutFactory.createClass(HOTEL_PIN_HTML),
-          iconShape: { type: "Circle", coordinates: [36, 36], radius: 36 },
-          iconOffset: [-36, -36],
-        }),
-      );
+        map.geoObjects.add(
+          new ymaps.Placemark([coords.lat, coords.lon], {}, {
+            iconLayout: ymaps.templateLayoutFactory.createClass(HOTEL_PIN_HTML),
+            iconShape: { type: "Circle", coordinates: [36, 36], radius: 36 },
+            iconOffset: [-36, -36],
+          }),
+        );
 
-      for (const point of CITY_MAP_POINTS) {
-        const placemark = new ymaps.Placemark([point.coords.lat, point.coords.lon], {}, {
-          iconLayout: ymaps.templateLayoutFactory.createClass(pointPinHtml(point)),
-          iconShape: { type: "Circle", coordinates: [20, 20], radius: 20 },
-          iconOffset: [-20, -20],
-          // Подпись наведённой метки должна лежать поверх соседних меток.
-          zIndexHover: 1000,
+        for (const point of CITY_MAP_POINTS) {
+          const placemark = new ymaps.Placemark([point.coords.lat, point.coords.lon], {}, {
+            iconLayout: ymaps.templateLayoutFactory.createClass(pointPinHtml(point)),
+            iconShape: { type: "Circle", coordinates: [20, 20], radius: 20 },
+            iconOffset: [-20, -20],
+            // Подпись наведённой метки должна лежать поверх соседних меток.
+            zIndexHover: 1000,
+          });
+          placemark.events.add("click", () => window.__hotelMapSelect?.(point.id));
+          placemark.events.add("mouseenter", () => {
+            document.querySelector(`[data-point-id="${point.id}"]`)?.classList.add("hm-pin--hover");
+          });
+          placemark.events.add("mouseleave", () => {
+            document.querySelector(`[data-point-id="${point.id}"]`)?.classList.remove("hm-pin--hover");
+          });
+          map.geoObjects.add(placemark);
+        }
+
+        const points: [number, number][] = [
+          [coords.lat, coords.lon],
+          ...CITY_MAP_POINTS.map((p): [number, number] => [p.coords.lat, p.coords.lon]),
+        ];
+        const positioned = map.setBounds(ymaps.util.bounds.fromPoints(points), {
+          checkZoomRange: true,
+          zoomMargin: 64,
         });
-        placemark.events.add("click", () => window.__hotelMapSelect?.(point.id));
-        placemark.events.add("mouseenter", () => {
-          document.querySelector(`[data-point-id="${point.id}"]`)?.classList.add("hm-pin--hover");
-        });
-        placemark.events.add("mouseleave", () => {
-          document.querySelector(`[data-point-id="${point.id}"]`)?.classList.remove("hm-pin--hover");
-        });
-        map.geoObjects.add(placemark);
+        // setBounds асинхронен. Выбор во время загрузки применяем после него.
+        void Promise.resolve(positioned).then(() => {
+          if (disposed || mapRef.current !== map) return;
+          if (latestActiveId.current !== initialActiveId.current) {
+            const point = CITY_MAP_POINTS.find((item) => item.id === latestActiveId.current);
+            if (point) map.setCenter([point.coords.lat, point.coords.lon], 16, { duration: 0 });
+          }
+          setMapState("ready");
+        }).catch(fail);
+      } catch {
+        fail();
       }
-
-      const points: [number, number][] = [
-        [coords.lat, coords.lon],
-        ...CITY_MAP_POINTS.map((p): [number, number] => [p.coords.lat, p.coords.lon]),
-      ];
-      map.setBounds(ymaps.util.bounds.fromPoints(points), {
-        checkZoomRange: true,
-        zoomMargin: 64,
-      });
-    });
+    }, fail);
 
     return () => {
+      disposed = true;
       mapRef.current?.destroy();
       mapRef.current = null;
     };
   }, [scriptReady]);
 
-  if (!apiKey) {
-    // Явная ошибка конфигурации лучше, чем молчаливо нерабочая карта
-    // (см. src/components/bnovo-booking-module.tsx — тот же приём).
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
-        Не задана переменная окружения NEXT_PUBLIC_YANDEX_MAPS_API_KEY. Карта не
-        может быть инициализирована — см. .env.example, ключ бесплатный,
-        получить на developer.tech.yandex.ru.
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!apiKey || !hotel.coords) return;
+    const timer = window.setTimeout(() => {
+      setMapState((current) => current === "loading" ? "error" : current);
+    }, 20_000);
+    return () => window.clearTimeout(timer);
+  }, [apiKey]);
 
-  if (!hotel.coords) return null;
+  useEffect(() => {
+    if (mapState !== "ready") return;
+    const container = document.getElementById(MAP_ELEMENT_ID);
+    if (!container) return;
+    function updateSelection() {
+      container?.querySelectorAll<HTMLElement>("[data-point-id]").forEach((marker) => {
+        marker.setAttribute("aria-pressed", String(marker.dataset.pointId === activeId));
+      });
+    }
+    const observer = new MutationObserver(updateSelection);
+    observer.observe(container, { childList: true, subtree: true });
+    updateSelection();
+    return () => observer.disconnect();
+  }, [activeId, mapState]);
+
+  const selectedPoint = CITY_MAP_POINTS.find((point) => point.id === activeId);
+  const mapHref = selectedPoint
+    ? routeHref(selectedPoint)
+    : "https://yandex.ru/maps/?text=" + encodeURIComponent(hotel.address ?? hotel.name);
+  const configured = Boolean(apiKey && hotel.coords);
+  const unavailable = !configured || mapState === "error";
 
   return (
-    <div className="relative h-[420px] w-full border-t border-white/10 sm:h-[520px] lg:h-[680px]">
-      <Script
+    <div role="region" aria-label="Карта отеля и ближайших мест" className="relative h-[420px] w-full border-t border-white/10 sm:h-[520px] lg:h-[680px]">
+      {unavailable ? (
+        <div role="status" className="absolute inset-0 z-10 flex flex-col items-start justify-center gap-4 bg-neva p-6 sm:p-10">
+          <p className="text-lg font-semibold">Не удалось загрузить карту</p>
+          <p className="max-w-xl text-sm text-white/70">
+            {hotel.address}. Карточки мест доступны, а маршрут можно открыть отдельно в Яндекс.Картах.
+          </p>
+          <a href={mapHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center rounded-lg border border-lantern/50 px-4 text-sm font-medium text-lantern hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-lantern">
+            Открыть Яндекс.Карты
+          </a>
+        </div>
+      ) : mapState === "loading" ? (
+        <div role="status" className="absolute inset-0 z-10 flex items-center justify-center bg-neva p-6 text-sm text-white/70">
+          Загружаем карту…
+        </div>
+      ) : null}
+      {configured && <Script
         src={`https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`}
         strategy="afterInteractive"
-        onReady={() => setScriptReady(true)}
-      />
+        onReady={() => {
+          if (typeof window.ymaps?.ready !== "function") { setMapState("error"); return; }
+          setScriptReady(true);
+        }}
+        onError={() => setMapState("error")}
+      />}
       <style>{`
           #${MAP_ELEMENT_ID} [class*="ground-pane"] {
             filter: saturate(0.55) brightness(1.04) contrast(0.95);
@@ -330,6 +396,10 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
             transition: transform 0.15s ease;
             cursor: pointer;
+          }
+          .hm-pin[aria-pressed="true"] {
+            border-color: #fff;
+            box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.4);
           }
           .hm-pin--hover,
           .hm-pin:focus-visible {
@@ -403,7 +473,20 @@ export function HotelMap({ activeId, onSelect }: HotelMapProps) {
             color: ${GOLD};
           }
         `}</style>
-      <div id={MAP_ELEMENT_ID} className="h-full w-full" />
+      <div
+        id={MAP_ELEMENT_ID}
+        className={mapState === "ready" ? "h-full w-full" : "h-full w-full opacity-0"}
+        inert={mapState !== "ready"}
+        aria-hidden={mapState !== "ready" ? true : undefined}
+        onKeyDownCapture={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-point-id]") : null;
+          const point = CITY_MAP_POINTS.find((item) => item.id === target?.dataset.pointId);
+          if (!point) return;
+          event.preventDefault();
+          onSelectRef.current(point.id);
+        }}
+      />
     </div>
   );
 }

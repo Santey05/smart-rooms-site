@@ -8,6 +8,7 @@ import { PetersburgExplorer } from "@/components/brand/petersburg-explorer";
 import { BookingSearchForm } from "@/components/booking-search-form";
 import { ContactList } from "@/components/contact-list";
 import { HeaderNav } from "@/components/site-header";
+import { MobileBookingBar } from "@/components/mobile-booking-bar";
 import { Button } from "@/components/ui/button";
 import { hotel } from "@/content/site";
 import { SITE_URL } from "@/lib/site-url";
@@ -119,15 +120,14 @@ export default function HomePage() {
           </div>
 
           {/* Навигация внутри карточки (раздел 6.1) */}
-          <nav
-            aria-label="Основная навигация"
-            className="relative z-10 flex items-center justify-between gap-4 px-6 py-5 sm:px-8 md:px-[56px] md:py-6"
+          <div
+            className="relative z-30 flex items-center justify-between gap-4 px-6 py-5 sm:px-8 md:px-[56px] md:py-6"
           >
-            <Link href="/" aria-label="Смарт румс — на главную">
+            <Link href="/" aria-label="Смарт румс — на главную" className="shrink-0">
               <LogoWordmark />
             </Link>
             <HeaderNav variant="overlay" />
-          </nav>
+          </div>
 
           {/* Заголовок → описание/локация → карточка бронирования */}
           <div className="relative z-10 flex flex-1 flex-col px-6 pb-8 sm:px-8 md:px-[56px] md:pb-12">
@@ -173,7 +173,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div id="hero-card" className="w-full scroll-mt-6 lg:w-[400px] lg:shrink-0">
+              <div id="hero-card" tabIndex={-1} className="w-full scroll-mt-6 lg:w-[400px] lg:shrink-0">
                 <BookingSearchForm />
               </div>
             </div>
@@ -181,12 +181,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* Мобильная sticky-кнопка (раздел 7, адаптив &lt;768px) */}
-      <div className="fixed inset-x-3 bottom-3 z-40 lg:hidden">
-        <Button asChild variant="default" className="h-12 w-full rounded-[10px] shadow-2xl">
-          <a href="#hero-card">Забронировать</a>
-        </Button>
-      </div>
+      <MobileBookingBar />
 
       {/* Почему выбирают */}
       <section className="mx-auto grid max-w-7xl gap-10 px-2 py-16 pb-28 sm:px-3 md:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-12 lg:pb-16">
@@ -292,7 +287,7 @@ export default function HomePage() {
         id="location"
         className="mx-auto max-w-7xl scroll-mt-4 px-2 pb-16 sm:px-3 md:px-6 lg:px-12"
       >
-        <p className="mb-8 text-3xl font-bold tracking-tight sm:text-4xl">
+        <p className="mb-8 break-words text-[clamp(1.5rem,7.5vw,1.875rem)] font-bold tracking-tight sm:text-4xl">
           <span className="block text-foreground">Это не список достопримечательностей,</span>
           <span className="block text-muted-foreground">а то, что будет у вас под окнами.</span>
         </p>

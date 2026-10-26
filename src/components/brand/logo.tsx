@@ -13,7 +13,7 @@ export function LogoWordmark({ className }: { className?: string }) {
 
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <span className="text-lg leading-none font-bold tracking-wide uppercase">Смарт румс</span>
+      <span className="text-base leading-none font-bold tracking-wide whitespace-nowrap uppercase sm:text-lg">Смарт румс</span>
       {/* На узких экранах тег-лайну не хватает места — он сминается в
           колонку из однословных строк (см. чат, 2026-10-01). Проще и
           надёжнее скрыть его до sm, чем ужимать текст до нечитаемого. */}
